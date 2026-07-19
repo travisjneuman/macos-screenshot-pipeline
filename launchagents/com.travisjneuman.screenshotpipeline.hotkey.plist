@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Hotkey accessory app for macos-screenshot-pipeline (default ⌘⇧E).
+  Installer replaces __HOME__.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.travisjneuman.screenshotpipeline.hotkey</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__HOME__/Applications/Screenshot Pipeline Hotkey.app/Contents/MacOS/Screenshot Pipeline Hotkey</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>Nice</key>
+  <integer>5</integer>
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/macos-screenshot-pipeline-hotkey.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/macos-screenshot-pipeline-hotkey.err.log</string>
+</dict>
+</plist>

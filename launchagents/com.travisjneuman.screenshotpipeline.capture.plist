@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Event-driven capture processor for macos-screenshot-pipeline.
+  WatchPaths / FSEvents: no polling. process.sh runs on staging changes, then exits.
+  Installer replaces __HOME__ and __STAGING__ with absolute paths.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.travisjneuman.screenshotpipeline.capture</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__HOME__/.local/libexec/macos-screenshot-pipeline/process.sh</string>
+  </array>
+
+  <key>WatchPaths</key>
+  <array>
+    <string>__STAGING__</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>Nice</key>
+  <integer>10</integer>
+
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/macos-screenshot-pipeline.launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/macos-screenshot-pipeline.launchd.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,13 @@
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+*.log
+/dist/
+/build/
+# Local compile artifacts if someone builds in-tree
+bin/hotkey-agent
+*.app/
+.claude/
+.codex/
