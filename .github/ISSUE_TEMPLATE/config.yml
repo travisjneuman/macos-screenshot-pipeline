@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Behavior / accuracy questions
+    url: https://github.com/travisjneuman/macos-screenshot-pipeline/blob/main/docs/BEHAVIOR.md
+    about: Read what the tool actually does before filing — order, Photos vs iCloud, delete rules.
+  - name: Roadmap
+    url: https://github.com/travisjneuman/macos-screenshot-pipeline/blob/main/docs/ROADMAP.md
+    about: See planned customization and what’s already configurable in v0.1.

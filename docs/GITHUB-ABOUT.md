@@ -90,10 +90,8 @@ The README is the homepage. When you have assets:
 
 | Asset | Path | Notes |
 |-------|------|-------|
-| Demo GIF | `docs/assets/demo.gif` | 20–30s; dark desktop; show paste + Photos + markup |
-| Optional static diagram PNG | `docs/assets/flow.png` | Only if GIF is delayed; SVG/PNG export of dual-path |
-
-Recording checklist is commented in `README.md`.
+| Demo GIF | `docs/assets/demo.gif` | README loop |
+| Hero | `docs/assets/hero.png` | README banner |
 
 ---
 

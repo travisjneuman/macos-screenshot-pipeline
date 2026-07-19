@@ -23,8 +23,6 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 
 ![Demo](docs/assets/demo.gif)
 
-<sub>10s · 720p stylized walkthrough (capture → dual-path → markup). MP4: [docs/assets/demo.mp4](docs/assets/demo.mp4)</sub>
-
 <sub>MIT · Travis J. Neuman · v0.1.0</sub>
 
 </div>
@@ -216,7 +214,10 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 | [REFERENCE](docs/REFERENCE.md) | Paths, labels, env, log lines |
 | [TEST-MATRIX](docs/TEST-MATRIX.md) | Manual acceptance checklist |
 | [SECURITY](SECURITY.md) | Threat model / reporting |
+| [ROADMAP](docs/ROADMAP.md) | Planned customization and how to request features |
 | [GitHub About copy](docs/GITHUB-ABOUT.md) | Description, topics, social blurb |
+
+**Want a change?** Open a [feature request](https://github.com/travisjneuman/macos-screenshot-pipeline/issues/new?labels=enhancement&template=feature_request.md) or discussion on the repo — preferences, clipboard formats, Photos on/off, staging paths, hotkeys, and more are on the [roadmap](docs/ROADMAP.md).
 
 ```bash
 ./scripts/smoke-test.sh    # static checks + optional swiftc

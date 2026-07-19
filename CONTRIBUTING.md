@@ -2,6 +2,10 @@
 
 Thanks for improving **macos-screenshot-pipeline**.
 
+## Feature requests
+
+Open a GitHub issue with the **Feature request** template. Check [docs/ROADMAP.md](docs/ROADMAP.md) first — many toggles (Photos off, staging path, keep staging) already exist in v0.1; say if those are insufficient and why.
+
 ## Ground rules
 
 - Keep the stack **native**: bash, Swift, `sips`, `osascript`, `launchd`, `defaults`.
@@ -30,6 +34,10 @@ Avoid installing the public agents on a machine that already runs a private fork
 ## Commit messages
 
 Conventional Commits preferred (`feat:`, `fix:`, `docs:`, `chore:`).
+
+## Docs accuracy
+
+Runtime behavior is defined in [docs/BEHAVIOR.md](docs/BEHAVIOR.md). Update it in the same PR when `process.sh` or installer semantics change. Do not put internal production notes or private host details in public docs.
 
 ## License
 
