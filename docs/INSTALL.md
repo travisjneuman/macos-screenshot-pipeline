@@ -15,8 +15,8 @@ Grant **Accessibility** to **Screenshot Pipeline Hotkey**. Allow **Photos** auto
 | Flag | Effect |
 |------|--------|
 | `--no-hotkey` | Do not build or load ⌘⇧E agent |
-| `--no-photos` | `IMPORT_PHOTOS=0`; keep staging by default |
-| `--keep-staging` | Never delete staging after success |
+| `--no-photos` | Writes `IMPORT_PHOTOS=0`; also sets `DELETE_STAGING_ON_SUCCESS=0` so staging files remain |
+| `--keep-staging` | Writes `DELETE_STAGING_ON_SUCCESS=0` (Photos may still run) |
 | `--staging PATH` | Capture location + WatchPaths target |
 | `--caption STR` | Photos description / fallback name |
 | `--keyword STR` | Photos keyword |
@@ -32,6 +32,14 @@ Grant **Accessibility** to **Screenshot Pipeline Hotkey**. Allow **Photos** auto
 | `~/Applications/Screenshot Pipeline Hotkey.app` | Hotkey accessory |
 | `~/Applications/Edit Clipboard in Preview.app` | Optional click-to-edit helper |
 | Staging dir (default Camera Roll) | Ephemeral captures |
+
+## Behavior after install
+
+See [BEHAVIOR.md](BEHAVIOR.md) for the authoritative pipeline:
+
+`screencapture → staging → Photos (original) → clipboard PNG → delete staging` (defaults).
+
+`install.sh` only installs agents/scripts/prefs; it does not capture screenshots itself.
 
 ## Preferences applied (unless `--skip-prefs`)
 

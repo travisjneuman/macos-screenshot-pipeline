@@ -7,8 +7,8 @@ Target: **v0.1.0** acceptance.
 | 1 | Fresh install | Clean user or VM; `./install.sh` | Exit 0; agents load; config written |
 | 2 | Capture paste | ⌘⇧4 → ⌘V in Notes | Image pastes |
 | 3 | Capture web paste | ⌘V in Chromium-based app if available | Image pastes |
-| 4 | Photos import | Default install; capture | Item in Recents; caption set |
-| 5 | Staging cleanup | After success | Staging has no screenshot file |
+| 4 | Photos import then clipboard | Default install; capture | Log shows photos before clipboard; item in Recents; caption set |
+| 5 | Staging cleanup | After Photos success + clipboard | Staging has no screenshot file; cleanup log line present |
 | 6 | Photos failure retain | Deny Automation; capture | File remains; log import failed |
 | 7 | Markup hotkey | Accessibility on; ⌘⇧E | Preview opens clipboard image |
 | 8 | No clipboard image | Clear clipboard; ⌘⇧E | Notification; no crash |

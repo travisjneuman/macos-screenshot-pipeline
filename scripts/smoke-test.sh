@@ -20,7 +20,7 @@ need=(
   launchagents/com.travisjneuman.screenshotpipeline.hotkey.plist
   docs/ARCHITECTURE.md docs/USER-GUIDE.md docs/INSTALL.md
   docs/OPERATIONS.md docs/TROUBLESHOOTING.md docs/REFERENCE.md
-  docs/TEST-MATRIX.md docs/GITHUB-ABOUT.md
+  docs/TEST-MATRIX.md docs/GITHUB-ABOUT.md docs/BEHAVIOR.md
 )
 
 for f in "${need[@]}"; do

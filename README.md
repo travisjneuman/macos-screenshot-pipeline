@@ -4,7 +4,7 @@
 
 ### Stock macOS capture. Finished handoff.
 
-**PNG on the clipboard. Originals in Photos. Markup in Preview.**  
+**Staging first. Original into Photos. Then PNG on the clipboard. Markup in Preview.**  
 No paid app. No Electron. No telemetry. No Desktop landfill.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-0B6E4F?style=for-the-badge)](LICENSE)
@@ -52,7 +52,7 @@ Apple’s Screenshot app still forces tradeoffs:
 |:---------|:------------|:---------|
 | **HDR** archive on XDR | HEIC when HDR is on | Photos keeps **original bytes** |
 | **Paste** into Discord / browsers / chat | Separate shortcut *or* file | **Automatic real PNG** every time |
-| **Photos / iCloud** library | Manual import | **Automatic** + caption |
+| **Photos** library archive | Manual import | **Automatic** import + caption (iCloud only if you already use iCloud Photos) |
 | **Clean Desktop** | Default dumping ground | Ephemeral **staging** only |
 | **Fast markup** | Thumbnail bubble or scavenger hunt | **`⌘⇧E`** → Preview |
 | **Idle CPU** | — | Capture agent **exits**; no poll loop |
@@ -137,14 +137,33 @@ Photos library content is **never** deleted.
 
 ## How it works
 
-| Step | Mechanism |
-|:----:|:----------|
-| 1 | Installer sets capture **location** → staging (default `~/Pictures/Camera Roll`), **HDR on**, **floating thumbnail off** (immediate file write) |
-| 2 | `launchd` **WatchPaths** fires only when staging changes — **no polling daemon** |
-| 3 | `process.sh` waits for stable size → **original → Photos** → **PNG → clipboard** → delete staging on success |
-| 4 | Tiny **Carbon** accessory app registers **⌘⇧E** → opens clipboard image in **Preview** |
+| Step | What actually happens |
+|:----:|:----------------------|
+| 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), sets **HDR on**, **floating thumbnail off** |
+| 2 | You use stock **Cmd+Shift+3/4/5**. macOS writes the capture **into staging** (this tool does not capture) |
+| 3 | `launchd` **WatchPaths** starts `process.sh` when staging changes; the job **exits** when done (no poll loop) |
+| 4 | `process.sh`, per image: wait until size stable → **import original into Photos** (if enabled) → **PNG onto clipboard** → **delete staging** only when cleanup rules allow |
+| 5 | Optional hotkey app: **Cmd+Shift+E** opens the **current clipboard image** in Preview (markup toolbar best-effort) |
 
-Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
+### Capture pipeline order (default install)
+
+```text
+screencapture  →  staging file
+               →  Photos.app import (original bytes; caption/keyword)
+               →  clipboard PNG (sips tone-map/convert)
+               →  delete staging file
+```
+
+| Mode | Photos | Clipboard PNG | Delete staging |
+|:-----|:------:|:-------------:|:---------------|
+| Default | Yes | Yes (after Photos attempt) | Yes, if Photos succeeded |
+| `--no-photos` / `IMPORT_PHOTOS=0` | No | Yes | No by default (`DELETE_STAGING_ON_SUCCESS=0`) |
+| `--keep-staging` / `DELETE_STAGING_ON_SUCCESS=0` | Per config | Yes | No |
+| Photos import fails | Failed | Still attempted | **No** (file retained for retry) |
+
+**Photos vs iCloud:** the script imports into the local **Photos** library via Automation. It does not talk to iCloud itself. If iCloud Photos is enabled in System Settings, Apple may sync that library afterward.
+
+Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract: **[docs/BEHAVIOR.md](docs/BEHAVIOR.md)**
 
 ---
 
@@ -158,7 +177,7 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
 | **Accessibility** | Global ⌘⇧E |
 | **Automation → Photos** | Import + caption |
 
-**Full Disk Access is not required.** No network calls from this project.
+**Full Disk Access is not required.** This project opens no network connections of its own (Photos/iCloud sync is Apple’s stack if you enabled it).
 
 ---
 
@@ -189,6 +208,7 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
 | Doc | What’s inside |
 |:----|:--------------|
 | [USER-GUIDE](docs/USER-GUIDE.md) | Daily loops, disable/reenable |
+| [BEHAVIOR](docs/BEHAVIOR.md) | **Authoritative** what the code does today |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | Data flow, dual-path, resources, TCC |
 | [INSTALL](docs/INSTALL.md) | Flags, layout, legacy migration |
 | [OPERATIONS](docs/OPERATIONS.md) | Health checks, logs, restart |
@@ -216,7 +236,7 @@ No. That shortcut never writes a staging file. Use **⌘⇧3 / ⌘⇧4 / ⌘⇧5
 <details>
 <summary><strong>Why is staging empty after a shot?</strong></summary>
 
-Default success path deletes the file after Photos import. Check **Photos → Recents** and `~/Library/Logs/macos-screenshot-pipeline.log`.
+On the default success path the file is removed **after** a successful Photos import **and** the clipboard PNG step. Check **Photos → Recents** and `~/Library/Logs/macos-screenshot-pipeline.log` for `photos: imported`, then `clipboard: PNG ready`, then `cleanup: removed staging`.
 
 </details>
 

@@ -2,12 +2,12 @@
 
 ## What this software does
 
-- Reads screenshot files from a user-chosen **staging directory**.
-- Writes a PNG to the **clipboard**.
-- Optionally tells **Photos** to import those files (Automation).
-- Optionally runs a small **global hotkey** app (Accessibility).
+- Reads screenshot files from a user-chosen **staging directory** (written first by macOS screencapture).
+- Optionally tells **Photos** to import those original files (Automation), then writes a PNG to the **clipboard**.
+- Optionally deletes the staging file after a successful run (see [docs/BEHAVIOR.md](docs/BEHAVIOR.md)).
+- Optionally runs a small **global hotkey** app (Accessibility) to open the clipboard image in Preview.
 
-It does **not** require Full Disk Access, does not open network connections of its own, and does not phone home.
+It does **not** require Full Disk Access, does not open network connections of its own, does not upload to iCloud/Google, and does not phone home.
 
 ## Permissions
 

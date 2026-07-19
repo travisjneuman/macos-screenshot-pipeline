@@ -6,7 +6,7 @@ Users want, simultaneously:
 
 1. High practical quality on HDR/XDR displays  
 2. Paste-friendly images for non-Apple apps  
-3. Automatic Photos / iCloud archive  
+3. Automatic Photos library archive (iCloud only if the user already syncs Photos)  
 4. No permanent Desktop pile  
 5. Fast markup without a paid suite  
 6. Stock capture shortcuts (`⌘⇧3/4/5`)  
@@ -18,16 +18,16 @@ Stock macOS offers save-to-folder **or** clipboard, not folder + clipboard + Pho
 
 | Path | Carrier | Consumer |
 |------|---------|----------|
-| Archive | Original `screencapture` bytes (HEIF when HDR) | Photos / iCloud |
+| Archive | Original `screencapture` bytes (HEIF when HDR) | Photos.app library (optional iCloud sync afterward) |
 | Share | `sips` → PNG → clipboard `«class PNGf»` | Everywhere else |
 
 Never claim one blob is both max-HDR archive and universal lossless PNG.
 
-**Processing order after the file lands in staging:**
+**Processing order after the file lands in staging** (see also [BEHAVIOR.md](BEHAVIOR.md)):
 
-1. Import **original** into Photos (archive / HDR path)  
-2. Convert a **PNG** onto the clipboard (share path)  
-3. **Delete** the staging file on success (when configured)
+1. Import **original** into Photos when `IMPORT_PHOTOS=1`  
+2. Convert a **PNG** onto the clipboard (**always attempted**)  
+3. **Delete** the staging file only when delete rules allow (Photos must have succeeded if Photos is enabled; `DELETE_STAGING_ON_SUCCESS` must be `1`)
 
 Staging always comes first — system `screencapture` writes the file; this project only reacts afterward.
 
@@ -47,11 +47,13 @@ Staging always comes first — system `screencapture` writes the file; this proj
            │                         │
            │                         ▼
            │              Photos import (original file)
+           │              [skipped if IMPORT_PHOTOS=0]
            │                         │
            │                         ▼
            │              clipboard PNG (sips + osascript)
+           │              [always attempted]
            │                         │
-           └──── delete staging on success ────┘
+           └──── delete staging if rules allow ────┘
 ```
 
 Markup path (independent):
@@ -81,9 +83,9 @@ Markup path (independent):
 
 | Step | On failure |
 |------|------------|
-| Photos import | **Retain** staging; still attempt clipboard PNG |
-| Clipboard PNG | Log; do not undo Photos import |
-| Delete staging | Only if Photos succeeded (when Photos enabled) and policy allows |
+| Photos import fails | Log; **retain** staging; **still** run clipboard PNG |
+| Clipboard PNG fails | Log; do not undo Photos import; delete still follows Photos/delete rules |
+| Delete staging | `DELETE_STAGING_ON_SUCCESS=1` **and** (Photos off **or** Photos succeeded) |
 
 ## Security / TCC
 

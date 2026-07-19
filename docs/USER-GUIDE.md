@@ -27,17 +27,24 @@ Window capture: **⌘⇧4**, then **Space**, click the window.
 
 ## Photos
 
-With default install, each successful capture appears in Photos **Recents** with description/keyword **Screenshot** (configurable).
+With default install, each processed capture is **imported into Photos.app** (library root / Recents). On the new item the script sets:
 
-iCloud Photos sync is whatever you already configured. Google Photos (if you use it as a secondary sink) may or may not show Apple captions — that mapping is outside this tool.
+- `description` → caption (default `Screenshot`)
+- `keywords` → `{ Screenshot }` (or your `KEYWORD`)
+- `name` → caption only if Photos left the name empty
+
+This project does **not** upload to iCloud. If **iCloud Photos** is enabled on the Mac, Apple may sync the library on its own schedule.
+
+Google Photos (if you use it as a secondary sink) may or may not show Apple captions — outside this tool.
 
 ## Staging folder
 
 Default: `~/Pictures/Camera Roll`.
 
-- After a **successful** Photos import (default mode), the staging file is **deleted**.  
-- If Photos fails, the file **stays** so you can retry.  
-- With `--no-photos`, files are **kept** unless you set `DELETE_STAGING_ON_SUCCESS=1` in config (usually unwise).
+- **Default mode:** after Photos import **succeeds** and the clipboard step runs, the staging file is **deleted**.  
+- **Photos fails:** file **stays** (retry by fixing Automation and re-running `process.sh`). Clipboard PNG is still attempted.  
+- **`--no-photos`:** installer sets `DELETE_STAGING_ON_SUCCESS=0` so files **remain** unless you change config.  
+- **`--keep-staging`:** never delete after success.
 
 ## Config
 

@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [0.1.0] — 2026-07-19
 
+### Documentation
+
+- Authoritative [docs/BEHAVIOR.md](docs/BEHAVIOR.md) matching `process.sh` order and delete rules.
+- Clarified Photos **library import** vs iCloud sync; clipboard runs after Photos attempt; staging deleted only on allowed success paths.
+
 ### Added
 
 - Event-driven capture pipeline via launchd `WatchPaths` (no polling).

@@ -1,14 +1,19 @@
 #!/bin/bash
-# macos-screenshot-pipeline — process staging captures into clipboard (+ optional Photos)
+# macos-screenshot-pipeline — process files already written to the staging folder
 #
 # Triggered by launchd WatchPaths on the staging directory.
 # Idle cost: none (no daemon loop). Runs only when staging changes, then exits.
 #
-# Per image (order is intentional):
-#   1. Wait until file size is stable (screencapture already wrote staging)
-#   2. Optionally import original bytes into Photos (archive / HDR path)
-#   3. Put a real PNG on the clipboard (share path)
-#   4. Delete staging only when configured and (if Photos on) import succeeded
+# Per image (order is intentional and matches the docs):
+#   0. screencapture (not this script) already saved the file into staging
+#   1. Wait until file size is stable
+#   2. If IMPORT_PHOTOS=1: import original bytes into the Photos app library
+#      (iCloud Photos sync is Photos/macOS — this script does not upload)
+#   3. Convert a true PNG onto the clipboard via sips + osascript (always attempted)
+#   4. Maybe delete staging:
+#        - never if DELETE_STAGING_ON_SUCCESS=0
+#        - never if IMPORT_PHOTOS=1 and Photos import failed
+#        - otherwise delete when DELETE_STAGING_ON_SUCCESS=1
 
 set -euo pipefail
 

@@ -11,11 +11,12 @@ Symptom
   │    ├─ Log silent? → capture agent / WatchPaths / location pref
   │    └─ sips/osascript failure → corrupt/partial file
   ├─ Photos missing shot
-  │    ├─ "photos: imported"? → Recents / iCloud delay
-  │    ├─ "import failed"? → Automation TCC
+  │    ├─ "photos: imported"? → check Photos Recents; iCloud sync is separate/delayed
+  │    ├─ "import failed"? → Automation TCC for Photos
+  │    ├─ "photos: skipped"? → IMPORT_PHOTOS=0 / --no-photos
   │    └─ Staging retained? → fix Photos; re-run process.sh
   ├─ Files stuck in staging
-  │    └─ Photos failure or DELETE off → fix import or config
+  │    └─ Photos failure, or DELETE_STAGING_ON_SUCCESS=0 → fix import or config
   ├─ Desktop filling up
   │    └─ location pref wrong → re-run install or apply-screencapture-prefs
   ├─ 5–10s delay before paste
@@ -36,7 +37,7 @@ Symptom
 | Paste empty; `sips failed` | Partial/exotic file | Re-capture; `file` on staging |
 | Paste empty; `PNG ready` | Target app | Try Notes |
 | Photos empty; import failed | Automation denied | Privacy → Automation → Photos |
-| Staging remains | Import failed or keep mode | By design; fix Photos or config |
+| Staging remains | Photos failed, or delete disabled | By design; fix Photos / config; clipboard may still have worked |
 | Desktop screenshots | Pref reset | Re-apply prefs |
 | Slow every shot | Floating thumbnail | `show-thumbnail -bool false` |
 | HEIC in Finder | HDR | Expected archive form |
@@ -57,8 +58,9 @@ Remember: **⌘⌃⇧4** never hits this pipeline.
 ## Photos
 
 1. Open Photos once (unlock library).  
-2. Privacy & Security → **Automation** — allow control of Photos.  
-3. Re-run `process.sh` on retained staging files.
+2. Privacy & Security → **Automation** — allow control of Photos (the script host may appear as `osascript` / `bash` depending on macOS).  
+3. Re-run `process.sh` on retained staging files.  
+4. Remember: success here is **local Photos import**. iCloud appearance on other devices is not performed by this tool.
 
 ## Hotkey
 
