@@ -7,15 +7,25 @@
 **PNG on the clipboard. Originals in Photos. Markup in Preview.**  
 No paid app. No Electron. No telemetry. No Desktop landfill.
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-0B6E4F?style=for-the-badge)](LICENSE)
+[![macOS](https://img.shields.io/badge/macOS-native-000000?style=for-the-badge&logo=apple&logoColor=white)](#requirements)
+[![launchd](https://img.shields.io/badge/idle-WatchPaths-1B4965?style=for-the-badge)](#how-it-works)
+[![HDR honest](https://img.shields.io/badge/HDR-dual--path-5C4D7A?style=for-the-badge)](#design-honesty)
+
+<br/>
+
+![Hero](docs/assets/hero.png)
+
 ```text
   Cmd+Shift+4   →   clipboard PNG  +  Photos  +  clean desk
   Cmd+Shift+E   →   Preview markup  →  paste anywhere
 ```
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-0B6E4F?style=for-the-badge)](LICENSE)
-[![macOS](https://img.shields.io/badge/macOS-native-000000?style=for-the-badge&logo=apple&logoColor=white)](#requirements)
-[![launchd](https://img.shields.io/badge/idle-WatchPaths-1B4965?style=for-the-badge)](#how-it-works)
-[![HDR honest](https://img.shields.io/badge/HDR-dual--path-5C4D7A?style=for-the-badge)](#design-honesty)
+![Demo](docs/assets/demo.gif)
+
+<sub>10s · 720p stylized walkthrough (capture → dual-path → markup). MP4: [docs/assets/demo.mp4](docs/assets/demo.mp4)</sub>
+
+<sub>MIT · Travis J. Neuman · v0.1.0</sub>
 
 </div>
 
@@ -41,25 +51,6 @@ flowchart LR
 flowchart LR
   E["Cmd+Shift+E"] --> V["Preview markup"] --> C["Cmd+A · Cmd+C · Cmd+V"]
 ```
-
-<div align="center">
-
-<!--
-  Drop a 20–30s demo here when recorded:
-  ![Demo](docs/assets/demo.gif)
-
-  Suggested shot list:
-  1. Desktop clean → Cmd+Shift+4 region
-  2. Cmd+V into Notes / Discord
-  3. Photos Recents with new item
-  4. Cmd+Shift+E → circle something → copy → paste
--->
-
-**Demo GIF** — *coming soon* (capture → paste → Photos → markup).
-
-<sub>MIT · Travis J. Neuman · v0.1.0</sub>
-
-</div>
 
 ---
 
