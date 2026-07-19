@@ -1,16 +1,5 @@
 <div align="center">
 
-```text
-╔══════════════════════════════════════════════════════════════════╗
-║                                                                  ║
-║   ⌘⇧4  ──▶  clipboard PNG  +  Photos  +  empty desk              ║
-║   ⌘⇧E  ──▶  Preview markup  ──▶  paste anywhere                  ║
-║                                                                  ║
-║              macos-screenshot-pipeline                           ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝
-```
-
 # macos-screenshot-pipeline
 
 ### Stock macOS capture. Finished handoff.
@@ -18,40 +7,55 @@
 **PNG on the clipboard. Originals in Photos. Markup in Preview.**  
 No paid app. No Electron. No telemetry. No Desktop landfill.
 
+```text
+  Cmd+Shift+4   →   clipboard PNG  +  Photos  +  clean desk
+  Cmd+Shift+E   →   Preview markup  →  paste anywhere
+```
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-0B6E4F?style=for-the-badge)](LICENSE)
 [![macOS](https://img.shields.io/badge/macOS-native-000000?style=for-the-badge&logo=apple&logoColor=white)](#requirements)
 [![launchd](https://img.shields.io/badge/idle-WatchPaths-1B4965?style=for-the-badge)](#how-it-works)
 [![HDR honest](https://img.shields.io/badge/HDR-dual--path-5C4D7A?style=for-the-badge)](#design-honesty)
 
-<br/>
+</div>
 
-```text
-┌─────────┐     ┌──────────────┐     ┌─────────────────────────────┐
-│  ⌘⇧4    │────▶│   staging    │────▶│  PNG → pasteboard           │
-│  ⌘⇧3    │     │  (ephemeral) │     │  original → Photos (HDR OK) │
-│  ⌘⇧5    │     └──────────────┘     │  staging file → deleted     │
-└─────────┘                          └─────────────────────────────┘
-
-┌─────────┐     ┌──────────────┐     ┌─────────────────────────────┐
-│  ⌘⇧E    │────▶│   Preview    │────▶│  annotate → ⌘A ⌘C → ⌘V      │
-└─────────┘     │   markup     │     └─────────────────────────────┘
-                └──────────────┘
+```mermaid
+flowchart LR
+  subgraph capture["Capture"]
+    K["Cmd+Shift+3 / 4 / 5"]
+  end
+  subgraph stage["Staging"]
+    S["ephemeral folder"]
+  end
+  subgraph out["Handoff"]
+    P["PNG → pasteboard"]
+    H["original → Photos"]
+    D["staging deleted"]
+  end
+  K --> S --> P
+  S --> H
+  S --> D
 ```
 
-<br/>
+```mermaid
+flowchart LR
+  E["Cmd+Shift+E"] --> V["Preview markup"] --> C["Cmd+A · Cmd+C · Cmd+V"]
+```
+
+<div align="center">
 
 <!--
   Drop a 20–30s demo here when recorded:
   ![Demo](docs/assets/demo.gif)
 
   Suggested shot list:
-  1. Desktop clean → ⌘⇧4 region
-  2. ⌘V into Notes / Discord
+  1. Desktop clean → Cmd+Shift+4 region
+  2. Cmd+V into Notes / Discord
   3. Photos Recents with new item
-  4. ⌘⇧E → circle something → copy → paste
+  4. Cmd+Shift+E → circle something → copy → paste
 -->
 
-<p><strong>Demo GIF</strong> — <em>coming soon</em> (capture → paste → Photos → markup).</p>
+**Demo GIF** — *coming soon* (capture → paste → Photos → markup).
 
 <sub>MIT · Travis J. Neuman · v0.1.0</sub>
 
@@ -90,22 +94,14 @@ Clipboard PNG is typically an **SDR tone-map** of HDR content. That is the corre
 
 `defaults write com.apple.screencapture type png` is a **preference**, not a guarantee under HDR.
 
-<div align="center">
-
-```text
-                    screencapture (HDR on)
-                            │
-              ┌─────────────┴─────────────┐
-              ▼                           ▼
-      original bytes                 sips → PNG
-      (HEIF when HDR)                «class PNGf»
-              │                           │
-              ▼                           ▼
-           Photos                    pasteboard
-         (archive)                   (share)
+```mermaid
+flowchart TB
+  SC["screencapture — HDR on"]
+  SC --> ORIG["original bytes<br/>often HEIF when HDR"]
+  SC --> PNG["sips → true PNG<br/>pasteboard PNGf"]
+  ORIG --> PH["Photos — archive"]
+  PNG --> CB["pasteboard — share"]
 ```
-
-</div>
 
 ---
 
