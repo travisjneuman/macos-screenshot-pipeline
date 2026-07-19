@@ -7,7 +7,7 @@ All notable changes to this project are documented in this file.
 ### Added
 
 - Event-driven capture pipeline via launchd `WatchPaths` (no polling).
-- Dual-path processing: true PNG on clipboard; original bytes into Photos.
+- Dual-path processing in order: staging file → original into Photos → true PNG on clipboard → delete staging.
 - Configurable staging directory, caption, keyword, Photos on/off, staging retention.
 - Global markup hotkey **⌘⇧E** (Carbon accessory app) → Preview.
 - `install.sh` / `uninstall.sh` with flags for hotkey, Photos, prefs restore, purge.

@@ -17,7 +17,7 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 ![Hero](docs/assets/hero.png)
 
 ```text
-  Cmd+Shift+4   →   clipboard PNG  +  Photos  +  clean desk
+  Cmd+Shift+4   →   staging  →  Photos (original)  →  clipboard PNG  →  cleanup
   Cmd+Shift+E   →   Preview markup  →  paste anywhere
 ```
 
@@ -31,20 +31,10 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 
 ```mermaid
 flowchart LR
-  subgraph capture["Capture"]
-    K["Cmd+Shift+3 / 4 / 5"]
-  end
-  subgraph stage["Staging"]
-    S["ephemeral folder"]
-  end
-  subgraph out["Handoff"]
-    P["PNG → pasteboard"]
-    H["original → Photos"]
-    D["staging deleted"]
-  end
-  K --> S --> P
-  S --> H
-  S --> D
+  K["Cmd+Shift+3 / 4 / 5"] --> S["staging file"]
+  S --> H["Photos — original / HDR"]
+  H --> P["clipboard — PNG"]
+  P --> D["delete staging"]
 ```
 
 ```mermaid
@@ -87,11 +77,10 @@ Clipboard PNG is typically an **SDR tone-map** of HDR content. That is the corre
 
 ```mermaid
 flowchart TB
-  SC["screencapture — HDR on"]
-  SC --> ORIG["original bytes<br/>often HEIF when HDR"]
-  SC --> PNG["sips → true PNG<br/>pasteboard PNGf"]
-  ORIG --> PH["Photos — archive"]
-  PNG --> CB["pasteboard — share"]
+  SC["screencapture writes staging<br/>HDR on — original bytes"]
+  SC --> PH["1 · Photos import<br/>original / often HEIF"]
+  PH --> CB["2 · sips → true PNG<br/>clipboard PNGf"]
+  CB --> RM["3 · delete staging file"]
 ```
 
 ---
@@ -152,7 +141,7 @@ Photos library content is **never** deleted.
 |:----:|:----------|
 | 1 | Installer sets capture **location** → staging (default `~/Pictures/Camera Roll`), **HDR on**, **floating thumbnail off** (immediate file write) |
 | 2 | `launchd` **WatchPaths** fires only when staging changes — **no polling daemon** |
-| 3 | `process.sh` waits for stable size → **PNG → clipboard** → **original → Photos** → delete staging on success |
+| 3 | `process.sh` waits for stable size → **original → Photos** → **PNG → clipboard** → delete staging on success |
 | 4 | Tiny **Carbon** accessory app registers **⌘⇧E** → opens clipboard image in **Preview** |
 
 Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**

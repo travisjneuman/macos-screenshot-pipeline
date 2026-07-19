@@ -23,6 +23,14 @@ Stock macOS offers save-to-folder **or** clipboard, not folder + clipboard + Pho
 
 Never claim one blob is both max-HDR archive and universal lossless PNG.
 
+**Processing order after the file lands in staging:**
+
+1. Import **original** into Photos (archive / HDR path)  
+2. Convert a **PNG** onto the clipboard (share path)  
+3. **Delete** the staging file on success (when configured)
+
+Staging always comes first — system `screencapture` writes the file; this project only reacts afterward.
+
 ## Data flow
 
 ```text
@@ -37,11 +45,12 @@ Never claim one blob is both max-HDR archive and universal lossless PNG.
            │                              ▼
            │                     process.sh (exit when done)
            │                         │
-           │              ┌──────────┼──────────┐
-           │              ▼                     ▼
-           │        clipboard PNG         Photos import
-           │        (sips+osascript)      (original file)
-           │                                   │
+           │                         ▼
+           │              Photos import (original file)
+           │                         │
+           │                         ▼
+           │              clipboard PNG (sips + osascript)
+           │                         │
            └──── delete staging on success ────┘
 ```
 
@@ -72,9 +81,9 @@ Markup path (independent):
 
 | Step | On failure |
 |------|------------|
-| Clipboard PNG | Log; continue to Photos if enabled |
-| Photos import | **Retain** staging file |
-| Delete staging | Only if success policy allows |
+| Photos import | **Retain** staging; still attempt clipboard PNG |
+| Clipboard PNG | Log; do not undo Photos import |
+| Delete staging | Only if Photos succeeded (when Photos enabled) and policy allows |
 
 ## Security / TCC
 

@@ -5,8 +5,9 @@
 ### Capture and paste
 
 1. **⌘⇧4** (selection), **⌘⇧3** (full screen), or **⌘⇧5** (toolbar).  
-2. Wait a fraction of a second.  
-3. **⌘V** into Notes, Discord, browser, editor, etc.
+2. macOS writes the file into the **staging** folder first.  
+3. The pipeline imports that **original** into Photos, then puts a **PNG** on the clipboard, then deletes the staging file (default mode).  
+4. **⌘V** into Notes, Discord, browser, editor, etc.
 
 Window capture: **⌘⇧4**, then **Space**, click the window.
 

@@ -4,10 +4,10 @@
 # Triggered by launchd WatchPaths on the staging directory.
 # Idle cost: none (no daemon loop). Runs only when staging changes, then exits.
 #
-# Per image:
-#   1. Wait until file size is stable
-#   2. Put a real PNG on the clipboard (share path)
-#   3. Optionally import original bytes into Photos (archive path)
+# Per image (order is intentional):
+#   1. Wait until file size is stable (screencapture already wrote staging)
+#   2. Optionally import original bytes into Photos (archive / HDR path)
+#   3. Put a real PNG on the clipboard (share path)
 #   4. Delete staging only when configured and (if Photos on) import succeeded
 
 set -euo pipefail
@@ -178,17 +178,22 @@ process_file() {
     return 0
   fi
 
-  # Clipboard first so paste is ready ASAP.
-  copy_png_to_clipboard "$f" || true
-
+  # Archive original first, then share-path PNG, then optional staging cleanup.
+  photos_ok=1
   if [[ "$IMPORT_PHOTOS" == "1" ]]; then
     if import_to_photos "$f"; then
-      maybe_delete_staging "$f"
+      photos_ok=1
     else
+      photos_ok=0
       log "retain: left in staging after Photos failure: $f"
     fi
   else
     log "photos: skipped (IMPORT_PHOTOS=0)"
+  fi
+
+  copy_png_to_clipboard "$f" || true
+
+  if [[ "$IMPORT_PHOTOS" != "1" ]] || [[ "$photos_ok" == "1" ]]; then
     maybe_delete_staging "$f"
   fi
 }

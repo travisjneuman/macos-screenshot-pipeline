@@ -10,19 +10,19 @@ Keep this file updated if the one-liner evolves.
 **Primary (recommended):**
 
 ```text
-Stock macOS screenshots → PNG on the clipboard + originals in Photos + ⌘⇧E Preview markup. Native launchd pipeline. HDR-honest dual path. MIT.
+Stock macOS screenshots → staging → Photos (original) → clipboard PNG + ⌘⇧E Preview markup. Native launchd pipeline. HDR-honest dual path. MIT.
 ```
 
 **Shorter:**
 
 ```text
-⌘⇧4 → paste-ready PNG + Photos archive. ⌘⇧E → Preview markup. Native, idle-free, HDR-honest. MIT.
+⌘⇧4 → staging → Photos original → paste PNG. ⌘⇧E → Preview markup. Native, idle-free, HDR-honest. MIT.
 ```
 
 **Alternate (benefit-led):**
 
 ```text
-Finish what stock Screenshot starts: clipboard PNG, Photos/iCloud archive, clean staging, Preview markup — no paid app.
+Finish what stock Screenshot starts: staging file, Photos/iCloud archive, then clipboard PNG, Preview markup — no paid app.
 ```
 
 ---
@@ -74,7 +74,7 @@ productivity
 ```text
 Open-sourced the macOS screenshot kit I actually run:
 
-⌘⇧4 → real PNG on the clipboard + original into Photos
+⌘⇧4 → staging → original into Photos → PNG on the clipboard
 ⌘⇧E → Preview markup
 HDR left on — dual-path on purpose (archive ≠ paste format)
 WatchPaths, not a polling daemon
@@ -106,7 +106,7 @@ First public release of a production-proven native screenshot handoff for macOS.
 
 ### Highlights
 - WatchPaths capture processor (idle = not running)
-- Dual path: true PNG on clipboard; original bytes → Photos
+- Ordered dual path: original → Photos, then true PNG → clipboard
 - ⌘⇧E → Preview markup via small Carbon hotkey app
 - Config file + install flags (`--no-photos`, `--no-hotkey`, …)
 - HDR-honest documentation (archive ≠ paste format)
