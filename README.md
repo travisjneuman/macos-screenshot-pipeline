@@ -294,7 +294,7 @@ If something else also watches the same staging folder or steals **⌘⇧E**, pi
 <div align="center">
 
 ```text
-⌘⇧4 then paste.  ⌘⇧E to mark up.
+Cmd+Shift+4 then paste.   Cmd+Shift+E to mark up.
 ```
 
 <sub>Name is utilitarian on purpose. The workflow shouldn’t be.</sub>
