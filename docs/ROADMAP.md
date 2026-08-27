@@ -16,6 +16,8 @@ Nothing here is a promise with a date. Order will shift based on real [issues](h
 | Change Photos caption / keyword | `--caption` / `--keyword` or edit `config.env` |
 | Skip hotkey agent | `./install.sh --no-hotkey` |
 | Leave screenshot prefs alone | `./install.sh --skip-prefs` |
+| Limit large clipboard images | `--clipboard-max-dimension PX` or `CLIPBOARD_MAX_DIMENSION=PX` |
+| Keep native-resolution clipboard images | `--clipboard-full-resolution` or `CLIPBOARD_MAX_DIMENSION=0` |
 
 See [BEHAVIOR.md](BEHAVIOR.md) and [INSTALL.md](INSTALL.md).
 
@@ -26,7 +28,7 @@ See [BEHAVIOR.md](BEHAVIOR.md) and [INSTALL.md](INSTALL.md).
 ## Near-term customization
 
 - **First-class config UI/docs** for every `config.env` key (discoverable, validated)
-- **Clipboard format choice** — PNG (default), TIFF, JPEG, quality/scale options
+- **Clipboard format choice** — PNG (default), TIFF, JPEG, and quality options
 - **Photos optional album** — import into a named album instead of library root only
 - **Remappable markup hotkey** (not only Cmd+Shift+E)
 - **Per-step toggles** without reinstall — e.g. clipboard-only for one session

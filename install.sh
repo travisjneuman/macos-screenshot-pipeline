@@ -25,6 +25,7 @@ SKIP_PREFS=0
 STAGING="${HOME_DIR}/Pictures/Camera Roll"
 CAPTION="Screenshot"
 KEYWORD="Screenshot"
+CLIPBOARD_MAX_DIMENSION=3840
 
 usage() {
   cat <<'EOF'
@@ -36,6 +37,10 @@ Usage: ./install.sh [options]
   --staging PATH    Staging directory (default: ~/Pictures/Camera Roll)
   --caption STR     Photos caption/description (default: Screenshot)
   --keyword STR     Photos keyword (default: Screenshot)
+  --clipboard-max-dimension PX
+                     Downsize the paste copy to fit within PX (default: 3840)
+  --clipboard-full-resolution
+                     Keep the paste copy at native resolution (slower for 5K/6K)
   --skip-prefs      Do not write com.apple.screencapture defaults
   -h, --help        Show this help
 
@@ -63,6 +68,15 @@ while [[ $# -gt 0 ]]; do
       [[ -n "$KEYWORD" ]] || { echo "error: --keyword needs a value" >&2; exit 2; }
       shift 2
       ;;
+    --clipboard-max-dimension)
+      CLIPBOARD_MAX_DIMENSION="${2:-}"
+      [[ "$CLIPBOARD_MAX_DIMENSION" =~ ^[1-9][0-9]*$ ]] || {
+        echo "error: --clipboard-max-dimension needs a positive integer" >&2
+        exit 2
+      }
+      shift 2
+      ;;
+    --clipboard-full-resolution) CLIPBOARD_MAX_DIMENSION=0; shift ;;
     --skip-prefs) SKIP_PREFS=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *)
@@ -103,6 +117,7 @@ CAPTION="${CAPTION}"
 KEYWORD="${KEYWORD}"
 IMPORT_PHOTOS=${IMPORT_PHOTOS}
 DELETE_STAGING_ON_SUCCESS=${DELETE_STAGING}
+CLIPBOARD_MAX_DIMENSION=${CLIPBOARD_MAX_DIMENSION}
 ENABLE_HDR=1
 SHOW_THUMBNAIL=0
 EOF
@@ -202,6 +217,7 @@ echo "Installed macos-screenshot-pipeline."
 echo "  Staging:     $STAGING"
 echo "  Photos:      $([[ "$IMPORT_PHOTOS" == "1" ]] && echo on || echo off)"
 echo "  Delete stage:$([[ "$DELETE_STAGING" == "1" ]] && echo on || echo off)"
+echo "  Clipboard:   $([[ "$CLIPBOARD_MAX_DIMENSION" == "0" ]] && echo 'native resolution' || echo "max ${CLIPBOARD_MAX_DIMENSION}px")"
 echo "  Hotkey:      $([[ "$WITH_HOTKEY" == "1" ]] && echo '⌘⇧E' || echo disabled)"
 echo "  Config:      $CONFIG_FILE"
 echo "  Log:         ~/Library/Logs/macos-screenshot-pipeline.log"

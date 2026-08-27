@@ -10,19 +10,19 @@ Keep this file updated if the one-liner evolves.
 **Primary (recommended):**
 
 ```text
-Stock macOS screenshots → staging → Photos (original) → clipboard PNG + ⌘⇧E Preview markup. Native launchd pipeline. HDR-honest dual path. MIT.
+Stock macOS screenshots → staging → fast clipboard PNG → Photos original + ⌘⇧E Preview markup. Native launchd pipeline. HDR-honest dual path. MIT.
 ```
 
 **Shorter:**
 
 ```text
-⌘⇧4 → staging → Photos original → paste PNG. ⌘⇧E → Preview markup. Native, idle-free, HDR-honest. MIT.
+⌘⇧4 → staging → fast paste PNG → Photos original. ⌘⇧E → Preview markup. Native, idle-free, HDR-honest. MIT.
 ```
 
 **Alternate (benefit-led):**
 
 ```text
-Finish what stock Screenshot starts: staging file, Photos/iCloud archive, then clipboard PNG, Preview markup — no paid app.
+Finish what stock Screenshot starts: fast clipboard PNG, untouched Photos archive, Preview markup — no paid app.
 ```
 
 ---
@@ -74,7 +74,7 @@ productivity
 ```text
 Open-sourced the macOS screenshot kit I actually run:
 
-⌘⇧4 → staging → original into Photos → PNG on the clipboard
+⌘⇧4 → staging → fast PNG on the clipboard → original into Photos
 ⌘⇧E → Preview markup
 HDR left on — dual-path on purpose (archive ≠ paste format)
 WatchPaths, not a polling daemon

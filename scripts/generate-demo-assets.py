@@ -157,7 +157,7 @@ def frame_image(i: int) -> Image.Image:
 
     if t < 1.5:
         p = ease(scene_t(i, 0.0, 1.2))
-        title = "staging → Photos → clipboard PNG"
+        title = "staging → clipboard PNG → Photos"
         bbox = draw.textbbox((0, 0), title, font=F_TITLE)
         tw = bbox[2] - bbox[0]
         alpha_y = int(lerp(40, 0, p))
@@ -204,30 +204,30 @@ def frame_image(i: int) -> Image.Image:
             draw.text((fx0 + 50, fy0 + 88), "Screenshot 2026-07-19.png", font=F_BODY, fill=TEXT)
             draw.text((fx0 + 50, fy0 + 112), "original bytes (HDR → often HEIF)", font=F_TINY, fill=MUTED)
 
-        # ordered handoff (not parallel “clipboard first”)
+        # ordered handoff: interactive clipboard first, archive second
         mid = ease(scene_t(i, 4.2, 5.2))
         if mid > 0:
             ox = int(lerp(700, 660, mid))
             draw_arrow(draw, fx0 + 420, fy0 + 180, ox - 12, 300, ACCENT3)
             rounded_rect(draw, (ox, 220, ox + 480, 320), 12, PANEL, ACCENT3, 2)
-            draw.text((ox + 24, 240), "1 · Archive", font=F_H2, fill=ACCENT3)
-            draw.text((ox + 24, 275), "original → Photos / iCloud", font=F_BODY, fill=TEXT)
+            draw.text((ox + 24, 240), "1 · Share", font=F_H2, fill=ACCENT3)
+            draw.text((ox + 24, 275), "fast 4K PNG → clipboard", font=F_BODY, fill=TEXT)
 
             rounded_rect(draw, (ox, 350, ox + 480, 450), 12, PANEL, ACCENT2, 2)
-            draw.text((ox + 24, 370), "2 · Share", font=F_H2, fill=ACCENT2)
-            draw.text((ox + 24, 405), "sips → PNG → clipboard", font=F_BODY, fill=TEXT)
+            draw.text((ox + 24, 370), "2 · Archive", font=F_H2, fill=ACCENT2)
+            draw.text((ox + 24, 405), "original → Photos / iCloud", font=F_BODY, fill=TEXT)
 
             rounded_rect(draw, (ox, 480, ox + 480, 560), 12, PANEL, ACCENT, 2)
             draw.text((ox + 24, 505), "3 · Cleanup — delete staging", font=F_H2, fill=ACCENT)
 
     elif t < 7.5:
-        draw.text((80, 120), "3 · Photos first, then pasteboard", font=F_H1, fill=TEXT)
+        draw.text((80, 120), "3 · Pasteboard first, then Photos", font=F_H1, fill=TEXT)
         p = ease(scene_t(i, 5.5, 6.2))
-        # Photos on the left (first), pasteboard on the right (second)
+        # Photos and pasteboard outcomes; pasteboard is ready first.
         left = (80, 200, 600, 580)
         right = (680, 200, 1200, 580)
-        draw_window(draw, left, "Photos — step 1")
-        draw_window(draw, right, "Pasteboard — step 2")
+        draw_window(draw, left, "Photos — step 2")
+        draw_window(draw, right, "Pasteboard — step 1")
 
         for r in range(2):
             for c in range(3):
@@ -242,11 +242,11 @@ def frame_image(i: int) -> Image.Image:
 
         rounded_rect(draw, (720, 270, 1160, 500), 10, (20, 40, 30), ACCENT, 2)
         draw.text((750, 300), "PNG ready", font=F_H1, fill=ACCENT)
-        draw.text((750, 350), "After Photos import:", font=F_BODY, fill=TEXT)
+        draw.text((750, 350), "Ready before Photos import:", font=F_BODY, fill=TEXT)
         draw.text((750, 385), "Cmd+V in Discord, Notes, browsers.", font=F_BODY, fill=TEXT)
         draw.text((750, 430), "Tone-mapped when source is HDR.", font=F_SMALL, fill=MUTED)
 
-        draw.text((80, 600), "Order: staging file → Photos (original) → clipboard PNG → delete staging.", font=F_SMALL, fill=WARN)
+        draw.text((80, 600), "Order: staging file → clipboard PNG → Photos (original) → delete staging.", font=F_SMALL, fill=WARN)
 
     elif t < 9.0:
         draw.text((80, 120), "4 · Markup — Cmd+Shift+E", font=F_H1, fill=TEXT)
@@ -291,8 +291,8 @@ def frame_image(i: int) -> Image.Image:
         draw.text((80, 200), "Done.", font=F_TITLE, fill=TEXT)
         lines = [
             "Staging receives the capture first",
-            "Photos keeps the original (HDR)",
             "Pasteboard gets a share PNG",
+            "Photos keeps the original (HDR)",
             "Staging file deleted — desk stays clean",
         ]
         for li, line in enumerate(lines):
@@ -315,13 +315,13 @@ def make_hero() -> Image.Image:
     draw.text((64, 48), "macos-screenshot-pipeline", font=F_H2, fill=MUTED)
     draw.text((64, 120), "Stock macOS capture.", font=F_TITLE, fill=TEXT)
     draw.text((64, 175), "Finished handoff.", font=F_TITLE, fill=TEXT)
-    draw.text((64, 250), "Staging → Photos (original) → clipboard PNG → cleanup", font=F_BODY, fill=MUTED)
+    draw.text((64, 250), "Staging → clipboard PNG → Photos original → cleanup", font=F_BODY, fill=MUTED)
 
     # three cards
     cards = [
         (64, 340, "1 · Staging", "Capture lands here", ACCENT2),
-        (450, 340, "2 · Photos", "then clipboard PNG", ACCENT),
-        (836, 340, "3 · Markup", "Cmd+Shift+E", ACCENT3),
+        (450, 340, "2 · Clipboard", "fast 4K PNG", ACCENT),
+        (836, 340, "3 · Photos", "original + HDR", ACCENT3),
     ]
     for x, y, top, bot, col in cards:
         rounded_rect(draw, (x, y, x + 360, y + 160), 16, PANEL, col, 3)

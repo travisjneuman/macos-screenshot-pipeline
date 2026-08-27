@@ -24,11 +24,13 @@
   <key>RunAtLoad</key>
   <false/>
 
+  <!-- This is a direct user interaction: minimize launchd scheduling latency. -->
   <key>ProcessType</key>
-  <string>Background</string>
+  <string>Interactive</string>
 
-  <key>Nice</key>
-  <integer>10</integer>
+  <!-- Allow rapid successive captures without launchd's usual 10s throttle. -->
+  <key>ThrottleInterval</key>
+  <integer>1</integer>
 
   <key>StandardOutPath</key>
   <string>__HOME__/Library/Logs/macos-screenshot-pipeline.launchd.out.log</string>

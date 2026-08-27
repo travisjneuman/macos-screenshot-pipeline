@@ -4,7 +4,7 @@
 
 ### Stock macOS capture. Finished handoff.
 
-**Staging first. Original into Photos. Then PNG on the clipboard. Markup in Preview.**  
+**Staging first. Paste-ready PNG immediately. Original into Photos. Markup in Preview.**
 No paid app. No Electron. No telemetry. No Desktop landfill.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-0B6E4F?style=for-the-badge)](LICENSE)
@@ -17,7 +17,7 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 ![Hero](docs/assets/hero.png)
 
 ```text
-  Cmd+Shift+4   →   staging  →  Photos (original)  →  clipboard PNG  →  cleanup
+  Cmd+Shift+4   →   staging  →  clipboard PNG  →  Photos (original)  →  cleanup
   Cmd+Shift+E   →   Preview markup  →  paste anywhere
 ```
 
@@ -30,9 +30,9 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 ```mermaid
 flowchart LR
   K["Cmd+Shift+3 / 4 / 5"] --> S["staging file"]
-  S --> H["Photos — original / HDR"]
-  H --> P["clipboard — PNG"]
-  P --> D["delete staging"]
+  S --> P["clipboard — paste-ready PNG"]
+  P --> H["Photos — original / HDR"]
+  H --> D["delete staging"]
 ```
 
 ```mermaid
@@ -49,7 +49,7 @@ Apple’s Screenshot app still forces tradeoffs:
 | You want | Stock macOS | **This** |
 |:---------|:------------|:---------|
 | **HDR** archive on XDR | HEIC when HDR is on | Photos keeps **original bytes** |
-| **Paste** into Discord / browsers / chat | Separate shortcut *or* file | **Automatic real PNG** every time |
+| **Paste** into Discord / browsers / chat | Separate shortcut *or* file | **Automatic PNG**, ready before Photos work |
 | **Photos** library archive | Manual import | **Automatic** import + caption (iCloud only if you already use iCloud Photos) |
 | **Clean Desktop** | Default dumping ground | Ephemeral **staging** only |
 | **Fast markup** | Thumbnail bubble or scavenger hunt | **`⌘⇧E`** → Preview |
@@ -67,7 +67,7 @@ Paid suites solve adjacent problems. This is the **thin native layer** on top of
 | Path | What you get | Why |
 |:-----|:-------------|:----|
 | **Archive** → Photos | System original (often **HEIC/HEIF** when HDR is on; name may still end in `.png`) | Best practical dynamic range in Apple’s stack |
-| **Share** → clipboard | **True PNG** via `sips` | Discord, Chromium, non-Apple apps |
+| **Share** → clipboard | Direct PNG or `sips` conversion; 3840px maximum dimension by default | Discord, Chromium, non-Apple apps |
 
 Clipboard PNG is typically an **SDR tone-map** of HDR content. That is the correct tradeoff for “paste cleanly everywhere.”
 
@@ -76,9 +76,9 @@ Clipboard PNG is typically an **SDR tone-map** of HDR content. That is the corre
 ```mermaid
 flowchart TB
   SC["screencapture writes staging<br/>HDR on — original bytes"]
-  SC --> PH["1 · Photos import<br/>original / often HEIF"]
-  PH --> CB["2 · sips → true PNG<br/>clipboard PNGf"]
-  CB --> RM["3 · delete staging file"]
+  SC --> CB["1 · direct PNG or sips<br/>clipboard PNGf"]
+  CB --> PH["2 · Photos import<br/>original / often HEIF"]
+  PH --> RM["3 · delete staging file"]
 ```
 
 ---
@@ -112,6 +112,8 @@ cd macos-screenshot-pipeline
 ./install.sh --keep-staging              # never delete staging after success
 ./install.sh --staging ~/Pictures/Screenshots
 ./install.sh --caption "Screen shot"
+./install.sh --clipboard-max-dimension 2560
+./install.sh --clipboard-full-resolution  # slower on 5K/6K
 ./install.sh --skip-prefs                # scripts/agents only
 ```
 
@@ -140,21 +142,21 @@ Photos library content is **never** deleted.
 | 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), sets **HDR on**, **floating thumbnail off** |
 | 2 | You use stock **Cmd+Shift+3/4/5**. macOS writes the capture **into staging** (this tool does not capture) |
 | 3 | `launchd` **WatchPaths** starts `process.sh` when staging changes; the job **exits** when done (no poll loop) |
-| 4 | `process.sh`, per image: wait until size stable → **import original into Photos** (if enabled) → **PNG onto clipboard** → **delete staging** only when cleanup rules allow |
+| 4 | `process.sh`, per image: wait until size stable → **PNG onto clipboard first** → **import original into Photos** (if enabled) → **delete staging** only when cleanup rules allow |
 | 5 | Optional hotkey app: **Cmd+Shift+E** opens the **current clipboard image** in Preview (markup toolbar best-effort) |
 
 ### Capture pipeline order (default install)
 
 ```text
 screencapture  →  staging file
-               →  Photos.app import (original bytes; caption/keyword)
-               →  clipboard PNG (sips tone-map/convert)
+               →  clipboard PNG (direct, or sips tone-map/resize)
+               →  Photos.app import (untouched original bytes; caption/keyword)
                →  delete staging file
 ```
 
 | Mode | Photos | Clipboard PNG | Delete staging |
 |:-----|:------:|:-------------:|:---------------|
-| Default | Yes | Yes (after Photos attempt) | Yes, if Photos succeeded |
+| Default | Yes | Yes (first; max 3840px) | Yes, if Photos succeeded |
 | `--no-photos` / `IMPORT_PHOTOS=0` | No | Yes | No by default (`DELETE_STAGING_ON_SUCCESS=0`) |
 | `--keep-staging` / `DELETE_STAGING_ON_SUCCESS=0` | Per config | Yes | No |
 | Photos import fails | Failed | Still attempted | **No** (file retained for retry) |
@@ -237,7 +239,7 @@ No. That shortcut never writes a staging file. Use **⌘⇧3 / ⌘⇧4 / ⌘⇧5
 <details>
 <summary><strong>Why is staging empty after a shot?</strong></summary>
 
-On the default success path the file is removed **after** a successful Photos import **and** the clipboard PNG step. Check **Photos → Recents** and `~/Library/Logs/macos-screenshot-pipeline.log` for `photos: imported`, then `clipboard: PNG ready`, then `cleanup: removed staging`.
+On the default success path the clipboard is ready first, then the file is removed after a successful Photos import. Check `~/Library/Logs/macos-screenshot-pipeline.log` for `clipboard: PNG ready`, then `photos: imported`, then `cleanup: removed staging`.
 
 </details>
 
@@ -252,6 +254,13 @@ Usually **HDR archive**. Expected. Pasteboard is still a real PNG.
 <summary><strong>Can I remap ⌘⇧E?</strong></summary>
 
 Not in v0.1 (fixed in the Swift agent). Follow-up territory.
+
+</details>
+
+<details>
+<summary><strong>Why are full-screen captures slower on a 4K/5K/6K display?</strong></summary>
+
+Pixel count, not physical screen size, drives conversion time. A scaled macOS display can render substantially more pixels than its “looks like” resolution, and **⌘⇧3** may create one capture per display. The default install limits only the clipboard copy to 3840px on its longest edge; Photos still receives the untouched original. Use `--clipboard-full-resolution` only when the paste copy must retain every pixel.
 
 </details>
 

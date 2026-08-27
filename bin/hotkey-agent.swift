@@ -56,7 +56,7 @@ func registerCmdShiftE() -> EventHotKeyRef? {
 
   // keyCode 14 = E; cmdKey + shiftKey
   var hotKeyRef: EventHotKeyRef?
-  var hotKeyID = EventHotKeyID(signature: OSType(0x4D535031), id: 1) // 'MSP1'
+  let hotKeyID = EventHotKeyID(signature: OSType(0x4D535031), id: 1) // 'MSP1'
   let status = RegisterEventHotKey(
     UInt32(kVK_ANSI_E),
     UInt32(cmdKey | shiftKey),

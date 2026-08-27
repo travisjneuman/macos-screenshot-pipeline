@@ -6,7 +6,7 @@
 
 1. **⌘⇧4** (selection), **⌘⇧3** (full screen), or **⌘⇧5** (toolbar).  
 2. macOS writes the file into the **staging** folder first.  
-3. The pipeline imports that **original** into Photos, then puts a **PNG** on the clipboard, then deletes the staging file (default mode).  
+3. The pipeline puts a paste-ready **PNG** on the clipboard first, imports the untouched **original** into Photos, then deletes the staging file (default mode).
 4. **⌘V** into Notes, Discord, browser, editor, etc.
 
 Window capture: **⌘⇧4**, then **Space**, click the window.
@@ -61,6 +61,8 @@ Then either wait for the next capture or run:
 ```
 
 Changing **staging path** also requires updating the capture LaunchAgent WatchPaths — re-run `./install.sh --staging NEWPATH` (or see OPERATIONS).
+
+`CLIPBOARD_MAX_DIMENSION=3840` keeps 5K/6K screenshots responsive while retaining the original in Photos. Set it to `0`, or reinstall with `--clipboard-full-resolution`, for a native-resolution paste copy.
 
 ## Temporarily disable
 

@@ -2,12 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Clipboard is populated before Photos import so archive responsiveness cannot delay paste.
+- Real PNG captures bypass re-encoding when they already fit the configured share size.
+- Clipboard images now default to a 3840px longest edge while Photos retains the untouched original; native-resolution paste remains available by flag or config.
+- The capture LaunchAgent uses interactive scheduling and a one-second throttle for lower wake latency.
+- Clipboard and per-file logs now report processing mode and elapsed time.
+
 ## [0.1.0] — 2026-07-19
 
 ### Documentation
 
 - Authoritative [docs/BEHAVIOR.md](docs/BEHAVIOR.md) matching `process.sh` order and delete rules.
-- Clarified Photos **library import** vs iCloud sync; clipboard runs after Photos attempt; staging deleted only on allowed success paths.
+- Clarified Photos **library import** vs iCloud sync and staging deletion rules as shipped in v0.1.0.
 
 ### Added
 

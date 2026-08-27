@@ -61,6 +61,32 @@ else
   bad "README honesty section incomplete"
 fi
 
+if grep -q '<string>Interactive</string>' launchagents/com.travisjneuman.screenshotpipeline.capture.plist \
+  && grep -A1 -q '<key>ThrottleInterval</key>' launchagents/com.travisjneuman.screenshotpipeline.capture.plist; then
+  ok "capture agent uses latency-sensitive scheduling"
+else
+  bad "capture agent scheduling optimization missing"
+fi
+
+export MACOS_SCREENSHOT_PIPELINE_TESTING=1
+export MACOS_SCREENSHOT_PIPELINE_CONFIG=/dev/null
+# shellcheck disable=SC1091
+source bin/process.sh
+if is_real_png docs/assets/hero.png; then
+  ok "PNG signature fast path recognizes hero"
+else
+  bad "PNG signature fast path rejected hero"
+fi
+
+if command -v sips >/dev/null 2>&1; then
+  CLIPBOARD_MAX_DIMENSION=100
+  if image_exceeds_clipboard_limit docs/assets/hero.png; then
+    ok "clipboard dimension ceiling recognizes oversized image"
+  else
+    bad "clipboard dimension ceiling missed oversized image"
+  fi
+fi
+
 if command -v swiftc >/dev/null 2>&1; then
   tmp="$(mktemp -t msp-hotkey)"
   if swiftc -O -o "$tmp" bin/hotkey-agent.swift 2>/dev/null; then

@@ -30,6 +30,7 @@ Bundle id (hotkey app): `com.travisjneuman.screenshotpipeline.hotkey`
 | `KEYWORD` | `Screenshot` | Photos `keywords` array (single entry) |
 | `IMPORT_PHOTOS` | `1` | `0` skips Photos |
 | `DELETE_STAGING_ON_SUCCESS` | `1` (installer sets `0` with `--no-photos` or `--keep-staging`) | `0` keeps files after a successful run |
+| `CLIPBOARD_MAX_DIMENSION` | `3840` | Longest-edge limit for clipboard PNG; `0` keeps native resolution |
 | `ENABLE_HDR` | `1` | Used by prefs helper only |
 | `SHOW_THUMBNAIL` | `0` | Used by prefs helper only |
 
@@ -46,8 +47,8 @@ Happy path order (Photos on):
 ```text
 wake: scanning staging '…'
 process: /…/Screenshot ….png
+clipboard: PNG ready (N bytes; resized-max-3840px; 2s)
 photos: imported 1 item(s) caption='Screenshot' :: Screenshot ….png
-clipboard: PNG ready (N bytes)
 cleanup: removed staging Screenshot ….png
 done: processed 1 image(s)
 ```
@@ -59,7 +60,7 @@ photos: skipped (IMPORT_PHOTOS=0)
 photos: import failed …
 retain: left in staging after Photos failure: …
 retain: DELETE_STAGING_ON_SUCCESS=0 :: …
-clipboard: sips failed …
+clipboard: sips conversion failed …
 edit: opening Preview for clipboard-edit-….png
 idle: no image files to process
 skip: another process holds lock

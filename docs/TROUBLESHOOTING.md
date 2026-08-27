@@ -20,7 +20,8 @@ Symptom
   ├─ Desktop filling up
   │    └─ location pref wrong → re-run install or apply-screencapture-prefs
   ├─ 5–10s delay before paste
-  │    └─ show-thumbnail true → set false; killall SystemUIServer
+  │    ├─ show-thumbnail true → set false; killall SystemUIServer
+  │    └─ 5K/6K or multi-display capture → keep CLIPBOARD_MAX_DIMENSION=3840
   ├─ ⌘⇧E does nothing
   │    ├─ Hotkey agent down → bootstrap
   │    ├─ Accessibility off → enable app
@@ -34,12 +35,14 @@ Symptom
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Paste empty; log silent | Agent unloaded / wrong location | Health check; reinstall |
-| Paste empty; `sips failed` | Partial/exotic file | Re-capture; `file` on staging |
+| Paste empty; `sips conversion failed` | Partial/exotic file | Re-capture; `file` on staging |
 | Paste empty; `PNG ready` | Target app | Try Notes |
 | Photos empty; import failed | Automation denied | Privacy → Automation → Photos |
 | Staging remains | Photos failed, or delete disabled | By design; fix Photos / config; clipboard may still have worked |
 | Desktop screenshots | Pref reset | Re-apply prefs |
 | Slow every shot | Floating thumbnail | `show-thumbnail -bool false` |
+| Slow large/full-screen shots | macOS may render a scaled 4K display at 5K/6K; PNG work scales with pixels | Use the default 3840px clipboard ceiling; originals in Photos are unchanged |
+| Several displays captured | Each display creates work; clipboard ends with the last processed image | Prefer selection/window capture when only one screen is needed |
 | HEIC in Finder | HDR | Expected archive form |
 | ⌘⇧E silent | Agent / Accessibility | `launchctl print`; Settings |
 | Lock skip messages | Overlap | Wait; clear stale lock >2 min |

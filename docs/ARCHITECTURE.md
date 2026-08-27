@@ -19,15 +19,17 @@ Stock macOS offers save-to-folder **or** clipboard, not folder + clipboard + Pho
 | Path | Carrier | Consumer |
 |------|---------|----------|
 | Archive | Original `screencapture` bytes (HEIF when HDR) | Photos.app library (optional iCloud sync afterward) |
-| Share | `sips` → PNG → clipboard `«class PNGf»` | Everywhere else |
+| Share | Direct PNG, or `sips` conversion/downsample → clipboard `«class PNGf»` | Everywhere else |
 
 Never claim one blob is both max-HDR archive and universal lossless PNG.
 
 **Processing order after the file lands in staging** (see also [BEHAVIOR.md](BEHAVIOR.md)):
 
-1. Import **original** into Photos when `IMPORT_PHOTOS=1`  
-2. Convert a **PNG** onto the clipboard (**always attempted**)  
+1. Put a paste-ready **PNG** onto the clipboard (**always attempted**)
+2. Import the untouched **original** into Photos when `IMPORT_PHOTOS=1`
 3. **Delete** the staging file only when delete rules allow (Photos must have succeeded if Photos is enabled; `DELETE_STAGING_ON_SUCCESS` must be `1`)
+
+The interactive share path comes first so Photos responsiveness cannot delay paste. Real PNG sources that already fit the configured ceiling bypass re-encoding. HDR/HEIF sources are converted, and oversized share copies are limited to 3840px on their longest edge by default; the Photos archive remains untouched.
 
 Staging always comes first — system `screencapture` writes the file; this project only reacts afterward.
 
@@ -46,12 +48,12 @@ Staging always comes first — system `screencapture` writes the file; this proj
            │                     process.sh (exit when done)
            │                         │
            │                         ▼
-           │              Photos import (original file)
-           │              [skipped if IMPORT_PHOTOS=0]
+           │              clipboard PNG (direct or sips)
+           │              [always attempted; first]
            │                         │
            │                         ▼
-           │              clipboard PNG (sips + osascript)
-           │              [always attempted]
+           │              Photos import (original file)
+           │              [skipped if IMPORT_PHOTOS=0]
            │                         │
            └──── delete staging if rules allow ────┘
 ```
@@ -83,8 +85,8 @@ Markup path (independent):
 
 | Step | On failure |
 |------|------------|
-| Photos import fails | Log; **retain** staging; **still** run clipboard PNG |
-| Clipboard PNG fails | Log; do not undo Photos import; delete still follows Photos/delete rules |
+| Photos import fails | Log; **retain** staging; clipboard has already been attempted |
+| Clipboard PNG fails | Log; still attempt Photos; delete still follows Photos/delete rules |
 | Delete staging | `DELETE_STAGING_ON_SUCCESS=1` **and** (Photos off **or** Photos succeeded) |
 
 ## Security / TCC

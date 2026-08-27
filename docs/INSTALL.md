@@ -20,6 +20,8 @@ Grant **Accessibility** to **Screenshot Pipeline Hotkey**. Allow **Photos** auto
 | `--staging PATH` | Capture location + WatchPaths target |
 | `--caption STR` | Photos description / fallback name |
 | `--keyword STR` | Photos keyword |
+| `--clipboard-max-dimension PX` | Longest-edge ceiling for the paste copy (default `3840`) |
+| `--clipboard-full-resolution` | Disable share-path resizing; slower for 5K/6K captures |
 | `--skip-prefs` | Do not write `com.apple.screencapture` |
 
 ## What install creates
@@ -37,7 +39,9 @@ Grant **Accessibility** to **Screenshot Pipeline Hotkey**. Allow **Photos** auto
 
 See [BEHAVIOR.md](BEHAVIOR.md) for the authoritative pipeline:
 
-`screencapture → staging → Photos (original) → clipboard PNG → delete staging` (defaults).
+`screencapture → staging → clipboard PNG → Photos (original) → delete staging` (defaults).
+
+The default clipboard copy fits within 3840px on its longest edge for fast paste. Photos still receives the untouched capture. Use `--clipboard-full-resolution` when share-path pixel preservation matters more than latency.
 
 `install.sh` only installs agents/scripts/prefs; it does not capture screenshots itself.
 

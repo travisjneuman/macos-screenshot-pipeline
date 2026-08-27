@@ -45,17 +45,18 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 9. `find` staging, **maxdepth 1**, files only.
 10. For each path that passes `is_image`:
     1. **wait_stable** — up to ~10 × 0.15s until size stops changing (or give up and continue).
-    2. **Photos** (if `IMPORT_PHOTOS=1`):
+    2. **Clipboard** (always attempted, before Photos):
+       - If the source is a real PNG and already fits `CLIPBOARD_MAX_DIMENSION`, copy its bytes directly.
+       - Otherwise use `sips` to convert to PNG and, when oversized, fit it within the configured longest-edge ceiling.
+       - Set the pasteboard to `«class PNGf»` via `osascript`.
+       - Default ceiling: `3840`; set `0` for native resolution.
+    3. **Photos** (if `IMPORT_PHOTOS=1`):
        - `osascript` → Photos `import … with skip check duplicates`
        - On each imported item, best-effort set:
          - `description` ← `CAPTION` (default `Screenshot`)
          - `keywords` ← `{ KEYWORD }` (default `Screenshot`)
          - `name` ← `CAPTION` only if name is missing/empty
        - Success = AppleScript returns integer count ≥ 1
-    3. **Clipboard** (always attempted, even if Photos failed or is disabled):
-       - `sips -s format png` to a temp file
-       - `osascript` set clipboard to `«class PNGf»`
-       - Temp file removed
     4. **Delete staging file** via `maybe_delete_staging` only when:
        - `DELETE_STAGING_ON_SUCCESS=1`, **and**
        - either `IMPORT_PHOTOS≠1` **or** Photos import succeeded  
@@ -70,6 +71,7 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 |-----|-----------------|---------------|------------------|
 | `IMPORT_PHOTOS` | `1` | `0` | unchanged (1 unless also `--no-photos`) |
 | `DELETE_STAGING_ON_SUCCESS` | `1` | `0` | `0` |
+| `CLIPBOARD_MAX_DIMENSION` | `3840` | same | same |
 | `CAPTION` / `KEYWORD` | `Screenshot` | same | same |
 | `STAGING_DIR` | `~/Pictures/Camera Roll` | same unless `--staging` | same |
 
@@ -109,7 +111,7 @@ Requires **Accessibility** for the hotkey app (and for toolbar automation).
 |-------|--------|
 | Staging file | Whatever screencapture wrote (often HEIF under HDR; extension may still be `.png`) |
 | Photos archive | **That same original file** (import by path) |
-| Clipboard | **PNG** produced by `sips` (typically SDR tone-map of HDR sources) |
+| Clipboard | **PNG**, direct when possible or produced by `sips` (typically SDR tone-map of HDR sources); max 3840px by default |
 
 ---
 
@@ -128,8 +130,8 @@ Only **direct children** of the staging directory (`-maxdepth 1`).
 ```text
 wake: scanning staging '…'
 process: /path/to/Screenshot ….png
+clipboard: PNG ready (N bytes; MODE; Ns)
 photos: imported 1 item(s) caption='Screenshot' :: Screenshot ….png
-clipboard: PNG ready (N bytes)
 cleanup: removed staging Screenshot ….png
 done: processed 1 image(s)
 ```
@@ -137,9 +139,9 @@ done: processed 1 image(s)
 Photos failure:
 
 ```text
+clipboard: PNG ready …    # interactive handoff happens first
 photos: import failed …
 retain: left in staging after Photos failure: …
-clipboard: PNG ready …    # still attempted
 # no cleanup line
 ```
 

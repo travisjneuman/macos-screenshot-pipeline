@@ -24,7 +24,8 @@ tail -30 "${HOME}/Library/Logs/macos-screenshot-pipeline.log" 2>/dev/null || tru
 - Capture job: loaded, **not running**, last exit 0, WatchPaths set.  
 - Hotkey job: **running** with a pid (if installed).  
 - Staging: no leftover screenshot images (default mode).  
-- Log order per shot: `photos: imported`, then `clipboard: PNG ready`, then `cleanup: removed staging`.
+- Log order per shot: `clipboard: PNG ready`, then `photos: imported`, then `cleanup: removed staging`.
+- Clipboard log includes mode (`direct`, `converted`, or `resized-max-Npx`) and elapsed seconds.
 
 ## Manual process run
 
