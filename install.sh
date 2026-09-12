@@ -140,6 +140,13 @@ else
   echo "==> Skipping screencapture preferences (--skip-prefs)"
 fi
 
+# Persistently disable legacy jobs: bootout alone lets saved plists return at login.
+# Keep the old files for reversible recovery.
+launchctl disable "${DOMAIN}/${LEGACY_CAPTURE}"
+if [[ "$WITH_HOTKEY" == "1" ]]; then
+  launchctl disable "${DOMAIN}/${LEGACY_HOTKEY}"
+fi
+
 # Avoid two capture agents on the same staging folder.
 legacy_note=0
 if launchctl print "${DOMAIN}/${LEGACY_CAPTURE}" >/dev/null 2>&1; then

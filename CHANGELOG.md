@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Installer persistently disables legacy screenshot agents so they cannot return at login and reopen Photos after automatic quit.
+
 - Clipboard preparation now precedes all Photos imports within each batch.
 - Preview skips re-encoding PNG clipboard data and preserves the TIFF fallback.
 - Capture timer defaults to zero; `CAPTURE_DELAY=5` or `10` remains configurable.

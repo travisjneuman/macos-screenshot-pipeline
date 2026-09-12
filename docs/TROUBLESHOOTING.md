@@ -77,3 +77,7 @@ Re-approve **Screenshot Pipeline Hotkey** in Accessibility after every significa
 ## Worker lock
 
 The native kernel lock releases when its worker exits, including crashes. The empty `~/.local/state/macos-screenshot-pipeline/process.lock` file normally remains. Do not delete it while a worker is running: replacing its inode can allow overlapping workers. The older `process.lock.d` directory is no longer used by current code.
+
+## Photos reopens after automatic quit
+
+Check `launchctl list` for both `com.travisjneuman.screenshotpipeline.capture` and legacy `dev.neuman.screenshot-to-photos`. Two workers can import the same screenshot, overwrite the clipboard, and reopen Photos after the current worker quits it. The installer now persistently disables the legacy capture job (and legacy hotkey when the replacement hotkey is enabled), then unloads it. `bootout` alone does not prevent the old plist loading at the next login. Existing legacy scripts/plists are preserved. To intentionally restore the old pipeline, first unload the current job, then use `launchctl enable` and `bootstrap` for the legacy job; never run both against the same staging directory.
