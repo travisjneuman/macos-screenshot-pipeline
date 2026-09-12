@@ -33,6 +33,7 @@ Bundle id (hotkey app): `com.travisjneuman.screenshotpipeline.hotkey`
 | `CLIPBOARD_MAX_DIMENSION` | `3840` | Longest-edge limit for clipboard PNG; `0` keeps native resolution |
 | `ENABLE_HDR` | `1` | Used by prefs helper only |
 | `SHOW_THUMBNAIL` | `0` | Used by prefs helper only |
+| `CAPTURE_DELAY` | `0` | Screenshot timer: 0, 5, or 10 seconds; prefs helper only |
 
 Override config path: `MACOS_SCREENSHOT_PIPELINE_CONFIG=/path/to/file`.
 
@@ -62,8 +63,8 @@ retain: left in staging after Photos failure: …
 retain: DELETE_STAGING_ON_SUCCESS=0 :: …
 clipboard: sips conversion failed …
 edit: opening Preview for clipboard-edit-….png
-idle: no image files to process
-skip: another process holds lock
+idle: no ready image files to process
+# Competing worker exits 75 before scanning (native lock held)
 ```
 
 ## Image extensions processed

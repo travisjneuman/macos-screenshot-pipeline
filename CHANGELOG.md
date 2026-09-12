@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Clipboard preparation now precedes all Photos imports within each batch.
+- Preview skips re-encoding PNG clipboard data and preserves the TIFF fallback.
+- Capture timer defaults to zero; `CAPTURE_DELAY=5` or `10` remains configurable.
+- Native kernel locking replaces age-based stale-lock deletion.
+- Unstable/replaced files and failed clipboard-only handoffs are retained; quoted Photos arguments are handled safely.
+- Photos quits after the batch only when it was initially closed; existing background sessions remain open.
+- Conversion scratch files use the application cache with exit cleanup.
+
 - Clipboard is populated before Photos import so archive responsiveness cannot delay paste.
 - Real PNG captures bypass re-encoding when they already fit the configured share size.
 - Clipboard images now default to a 3840px longest edge while Photos retains the untouched original; native-resolution paste remains available by flag or config.

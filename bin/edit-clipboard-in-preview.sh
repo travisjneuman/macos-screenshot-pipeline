@@ -21,8 +21,10 @@ find "$CACHE_DIR" -type f -name 'clipboard-edit-*.png' -mtime +1 -delete 2>/dev/
 
 OUT="${CACHE_DIR}/clipboard-edit-$(date +%Y%m%d-%H%M%S)-$$.png"
 
-if ! /usr/bin/osascript <<APPLESCRIPT >/dev/null 2>&1
-set outPath to "${OUT}"
+if ! clipboard_format="$(/usr/bin/osascript - "$OUT" <<'APPLESCRIPT' 2>/dev/null
+on run argv
+set outPath to item 1 of argv
+set imageFormat to "PNG"
 set wrote to false
 try
   set pngData to the clipboard as «class PNGf»
@@ -42,6 +44,7 @@ end try
 if wrote is false then
   try
     set tiffData to the clipboard as «class TIFF»
+    set imageFormat to "TIFF"
     set fRef to open for access POSIX file outPath with write permission
     try
       set eof fRef to 0
@@ -57,14 +60,24 @@ if wrote is false then
 end if
 
 if wrote is false then error "no image on clipboard"
+return imageFormat
+end run
 APPLESCRIPT
-then
+)"; then
+  rm -f "$OUT"
   log "no image on clipboard"
   /usr/bin/osascript -e 'display notification "Copy or capture an image first." with title "Screenshot Pipeline" subtitle "No image on clipboard"' 2>/dev/null || true
   exit 0
 fi
 
-/usr/bin/sips -s format png "$OUT" --out "$OUT" >/dev/null 2>&1 || true
+# PNG clipboard bytes are already ready for Preview; only TIFF needs conversion.
+if [[ "$clipboard_format" == "TIFF" ]]; then
+  if ! /usr/bin/sips -s format png "$OUT" --out "$OUT" >/dev/null 2>&1; then
+    log "TIFF to PNG conversion failed"
+    rm -f "$OUT"
+    exit 1
+  fi
+fi
 
 if [[ ! -s "$OUT" ]]; then
   log "empty output file"
@@ -73,8 +86,9 @@ fi
 
 log "opening Preview for $(basename "$OUT") ($(stat -f%z "$OUT") bytes)"
 
-/usr/bin/osascript <<APPLESCRIPT
-set imagePath to POSIX file "${OUT}"
+/usr/bin/osascript - "$OUT" <<'APPLESCRIPT'
+on run argv
+set imagePath to POSIX file (item 1 of argv)
 tell application "Preview"
   activate
   open imagePath
@@ -98,6 +112,7 @@ try
     end tell
   end tell
 end try
+end run
 APPLESCRIPT
 
 log "Preview opened (markup auto-show is best-effort)"

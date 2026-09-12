@@ -29,6 +29,7 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
    - `captureHDR` → true (`ENABLE_HDR=1`)
    - `type` → `png` (preference only)
    - `show-thumbnail` → false (`SHOW_THUMBNAIL=0`)
+   - `captureDelay` → 0 (`CAPTURE_DELAY=0`; optional 5 or 10 seconds)
 2. User presses stock **Cmd+Shift+3 / 4 / 5** (or window mode via Space after 4).
 3. **WindowServer / screencapture** writes a file into the staging directory.
 
@@ -41,30 +42,23 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 
 ### C. `process.sh` per wake
 
-8. Acquire single-flight lock (`mkdir` lock dir; stale > 120s cleared).
-9. `find` staging, **maxdepth 1**, files only.
-10. For each path that passes `is_image`:
-    1. **wait_stable** — up to ~10 × 0.15s until size stops changing (or give up and continue).
-    2. **Clipboard** (always attempted, before Photos):
-       - If the source is a real PNG and already fits `CLIPBOARD_MAX_DIMENSION`, copy its bytes directly.
-       - Otherwise use `sips` to convert to PNG and, when oversized, fit it within the configured longest-edge ceiling.
-       - Set the pasteboard to `«class PNGf»` via `osascript`.
-       - Default ceiling: `3840`; set `0` for native resolution.
-    3. **Photos** (if `IMPORT_PHOTOS=1`):
-       - `osascript` → Photos `import … with skip check duplicates`
-       - On each imported item, best-effort set:
-         - `description` ← `CAPTION` (default `Screenshot`)
-         - `keywords` ← `{ KEYWORD }` (default `Screenshot`)
-         - `name` ← `CAPTION` only if name is missing/empty
-       - Success = AppleScript returns integer count ≥ 1
-    4. **Delete staging file** via `maybe_delete_staging` only when:
-       - `DELETE_STAGING_ON_SUCCESS=1`, **and**
-       - either `IMPORT_PHOTOS≠1` **or** Photos import succeeded  
-       Otherwise the staging file is **retained**.
-
-11. Log to `~/Library/Logs/macos-screenshot-pipeline.log` (paths/sizes/status only).
-12. On exit, request Photos quit only if it was not running before the first import in this batch. Existing background sessions stay open. Unknown prior state leaves Photos open; empty/clipboard-only wakes do not touch it. Cleanup also runs on errors and INT/TERM, preserving exit status; quit failures are logged.
-13. Exit 0 on normal completion (including idle “no images” wakes).
+8. Acquire a native `lockf -k -s -t 0` lock on `~/.local/state/macos-screenshot-pipeline/process.lock`. A competing invocation exits 75; the kernel releases the lock when the worker exits. The empty lock file remains and must not be deleted to release a running worker.
+9. `find` staging, **maxdepth 1**, files only; preserve discovery order.
+10. For each image, wait up to 10 × 0.15s for a nonempty file with unchanged identity, size and modification/change timestamps. Retain files that never stabilize; do not import or delete them.
+11. Attempt **clipboard work for every ready image before any Photos import**:
+    - Real PNGs within `CLIPBOARD_MAX_DIMENSION` bypass conversion.
+    - Other formats are converted to PNG; oversized clipboard copies are resized (default `3840`, `0` for native resolution).
+    - Temporary conversion files live in the application cache and are removed after use or ordinary exit cleanup.
+    - The last successful clipboard write wins, as before. This is not a multi-image clipboard format.
+12. Then archive each ready image:
+    - Retain and skip import if its recorded file identity/size/timestamps changed after clipboard preparation.
+    - If enabled, Photos imports original bytes with `skip check duplicates`; metadata (`description`, `keywords`, missing/empty `name`) is best-effort. Success requires an integer import count ≥ 1.
+    - Paths, captions and keywords are AppleScript arguments, supporting quotes and backslashes without source interpolation.
+    - Delete only if the file is still unchanged, `DELETE_STAGING_ON_SUCCESS=1`, and Photos succeeded (when enabled) or the clipboard succeeded (when Photos is disabled).
+    - A successful Photos import can still permit cleanup after a clipboard failure, preserving the existing archive-first retention rule.
+13. Log clipboard and batch elapsed seconds plus per-file outcomes. Timings have whole-second precision and do not measure the delay before launchd starts the worker.
+14. On exit, request Photos quit only if it was not running before the first import. Existing foreground/background sessions stay open. Unknown prior state leaves Photos open; empty/clipboard-only wakes do not touch it. Cleanup also runs on errors and INT/TERM, preserving exit status; quit failures are logged. Uncatchable termination cannot run app cleanup.
+15. Exit 0 on normal completion, including empty wakes. No persistent poll loop or new scheduler is added. New arrivals outside the scan and retained failures remain subject to the existing WatchPaths/retry behavior; filesystem notifications are not a guaranteed durable queue.
 
 ### Default config written by `install.sh`
 
@@ -73,6 +67,7 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 | `IMPORT_PHOTOS` | `1` | `0` | unchanged (1 unless also `--no-photos`) |
 | `DELETE_STAGING_ON_SUCCESS` | `1` | `0` | `0` |
 | `CLIPBOARD_MAX_DIMENSION` | `3840` | same | same |
+| `CAPTURE_DELAY` | `0` | same | same |
 | `CAPTION` / `KEYWORD` | `Screenshot` | same | same |
 | `STAGING_DIR` | `~/Pictures/Camera Roll` | same unless `--staging` | same |
 
@@ -86,6 +81,7 @@ Independent of capture processing:
 2. App registers **Cmd+Shift+E** via Carbon `RegisterEventHotKey` (not remappable in v0.1).
 3. On press, runs `edit-clipboard-in-preview.sh`:
    - Reads clipboard as `PNGf` or `TIFF` into `~/Library/Caches/macos-screenshot-pipeline/`
+   - Preserves PNG bytes directly; converts only the TIFF fallback, stopping on conversion failure.
    - Opens that file in **Preview**
    - Best-effort “Show Markup Toolbar” via System Events (may need Accessibility)
    - If no image: notification; exit 0
@@ -134,7 +130,7 @@ process: /path/to/Screenshot ….png
 clipboard: PNG ready (N bytes; MODE; Ns)
 photos: imported 1 item(s) caption='Screenshot' :: Screenshot ….png
 cleanup: removed staging Screenshot ….png
-done: processed 1 image(s)
+done: processed 1 image(s) in Ns
 ```
 
 Photos failure:

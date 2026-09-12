@@ -45,7 +45,7 @@ Symptom
 | Several displays captured | Each display creates work; clipboard ends with the last processed image | Prefer selection/window capture when only one screen is needed |
 | HEIC in Finder | HDR | Expected archive form |
 | ⌘⇧E silent | Agent / Accessibility | `launchctl print`; Settings |
-| Lock skip messages | Overlap | Wait; clear stale lock >2 min |
+| Lock exit code 75 | Another worker holds the native lock | Let the active worker finish; do not remove its lock file |
 | RegisterEventHotKey failed | Conflict / double | Restart hotkey agent |
 
 ## Clipboard
@@ -74,10 +74,6 @@ tail -20 ~/Library/Logs/macos-screenshot-pipeline-hotkey.err.log
 
 Re-approve **Screenshot Pipeline Hotkey** in Accessibility after every significant rebuild.
 
-## Clear stale lock
+## Worker lock
 
-```bash
-rm -rf ~/.local/state/macos-screenshot-pipeline/process.lock.d
-```
-
-Only if no `process.sh` is running and the lock is stuck.
+The native kernel lock releases when its worker exits, including crashes. The empty `~/.local/state/macos-screenshot-pipeline/process.lock` file normally remains. Do not delete it while a worker is running: replacing its inode can allow overlapping workers. The older `process.lock.d` directory is no longer used by current code.

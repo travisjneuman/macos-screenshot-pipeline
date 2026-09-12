@@ -4,12 +4,12 @@
 # Triggered by launchd WatchPaths on the staging directory.
 # Idle cost: none (no daemon loop). Runs only when staging changes, then exits.
 #
-# Per image (order is intentional and matches the docs):
+# Per batch (order is intentional and matches the docs):
 #   0. screencapture (not this script) already saved the file into staging
 #   1. Wait until file size is stable
 #   2. Put a paste-ready PNG on the clipboard as quickly as possible
 #      (direct copy for real PNGs; conversion/downsampling only when needed)
-#   3. If IMPORT_PHOTOS=1: import original bytes into the Photos app library
+#   3. After clipboard work for all ready images, if IMPORT_PHOTOS=1: import original bytes into the Photos app library
 #      (iCloud Photos sync is Photos/macOS — this script does not upload)
 #   4. Maybe delete staging:
 #        - never if DELETE_STAGING_ON_SUCCESS=0
@@ -26,7 +26,9 @@ STAGING="${STAGING_DIR:-${SCREENSHOT_STAGING:-$HOME/Pictures/Camera Roll}}"
 LOG_DIR="${HOME}/Library/Logs"
 LOG_FILE="${LOG_DIR}/macos-screenshot-pipeline.log"
 STATE_DIR="${HOME}/.local/state/macos-screenshot-pipeline"
-LOCK_DIR="${STATE_DIR}/process.lock.d"
+LOCK_FILE="${STATE_DIR}/process.lock"
+CACHE_DIR="${HOME}/Library/Caches/macos-screenshot-pipeline"
+CLIPBOARD_TMP=""
 CAPTION="${CAPTION:-Screenshot}"
 NOTE_KEYWORD="${KEYWORD:-Screenshot}"
 IMPORT_PHOTOS="${IMPORT_PHOTOS:-1}"
@@ -66,42 +68,13 @@ cleanup() {
       log "photos: quit failed :: $result"
     fi
   fi
-  rm -rf "$LOCK_DIR"
+  [[ -z "$CLIPBOARD_TMP" ]] || rm -f "$CLIPBOARD_TMP"
   exit "$status"
-}
-
-# Portable single-flight lock (macOS has no flock util).
-# mkdir is atomic; stale locks older than 2 minutes are cleared.
-acquire_lock() {
-  if mkdir "$LOCK_DIR" 2>/dev/null; then
-    echo "$$" >"${LOCK_DIR}/pid"
-    trap cleanup EXIT
-    trap 'exit 130' INT
-    trap 'exit 143' TERM
-    return 0
-  fi
-  if [[ -d "$LOCK_DIR" ]]; then
-    local mtime age
-    mtime=$(stat -f%m "$LOCK_DIR" 2>/dev/null || echo 0)
-    age=$(( $(date +%s) - mtime ))
-    if [[ "$age" -gt 120 ]]; then
-      log "lock: clearing stale lock (${age}s)"
-      rm -rf "$LOCK_DIR"
-      if mkdir "$LOCK_DIR" 2>/dev/null; then
-        echo "$$" >"${LOCK_DIR}/pid"
-        trap cleanup EXIT
-        trap 'exit 130' INT
-        trap 'exit 143' TERM
-        return 0
-      fi
-    fi
-  fi
-  return 1
 }
 
 is_image() {
   local f="$1" base ext
-  base="$(basename "$f")"
+  base="${f##*/}"
   case "$base" in
     .*|desktop.ini|Thumbs.db|\$RECYCLE.BIN) return 1 ;;
   esac
@@ -127,25 +100,36 @@ image_exceeds_clipboard_limit() {
   [[ "$CLIPBOARD_MAX_DIMENSION" -gt 0 ]] || return 1
 
   dimensions="$(/usr/bin/sips -g pixelWidth -g pixelHeight "$src" 2>/dev/null)" || return 1
-  width="$(printf '%s\n' "$dimensions" | awk '/pixelWidth:/ { print $2; exit }')"
-  height="$(printf '%s\n' "$dimensions" | awk '/pixelHeight:/ { print $2; exit }')"
+  width=""; height=""
+  local label value
+  while read -r label value; do
+    case "$label" in
+      pixelWidth:) width="$value" ;;
+      pixelHeight:) height="$value" ;;
+    esac
+  done <<< "$dimensions"
   [[ "$width" =~ ^[0-9]+$ && "$height" =~ ^[0-9]+$ ]] || return 1
   [[ "$width" -gt "$CLIPBOARD_MAX_DIMENSION" || "$height" -gt "$CLIPBOARD_MAX_DIMENSION" ]]
+}
+
+# Include identity and timestamps so replacements/rewrites are not just size checks.
+file_signature() {
+  stat -f '%d:%i:%z:%m:%c' "$1" 2>/dev/null
 }
 
 wait_stable() {
   local f="$1" a b i
   for i in 1 2 3 4 5 6 7 8 9 10; do
     [[ -f "$f" ]] || return 1
-    a=$(stat -f%z "$f" 2>/dev/null || echo 0)
+    a="$(file_signature "$f")" || return 1
     sleep 0.15
-    b=$(stat -f%z "$f" 2>/dev/null || echo 0)
-    if [[ "$a" == "$b" && "$a" -gt 0 ]]; then
+    b="$(file_signature "$f")" || return 1
+    if [[ "$a" == "$b" && -s "$f" ]]; then
+      STABLE_SIGNATURE="$b"
       return 0
     fi
   done
-  [[ -f "$f" ]] || return 1
-  return 0
+  return 1
 }
 
 copy_png_to_clipboard() {
@@ -162,7 +146,9 @@ copy_png_to_clipboard() {
   if is_real_png "$src" && [[ "$resize" == "0" ]]; then
     paste_source="$src"
   else
-    tmp="$(mktemp "${TMPDIR:-/tmp}/ss-clip.XXXXXX.png")"
+    mkdir -p "$CACHE_DIR" || return 1
+    tmp="$(mktemp "${CACHE_DIR}/ss-clip.XXXXXX")" || return 1
+    CLIPBOARD_TMP="$tmp"
     paste_source="$tmp"
     mode="converted"
     if [[ "$resize" == "1" ]]; then
@@ -190,43 +176,40 @@ APPLESCRIPT
     size="$(stat -f%z "$paste_source" 2>/dev/null || echo 0)"
     log "clipboard: PNG ready (${size} bytes; ${mode}; ${elapsed}s)"
     [[ -n "$tmp" ]] && rm -f "$tmp"
+    CLIPBOARD_TMP=""
     return 0
   fi
   log "clipboard: osascript failed for $src"
   [[ -n "$tmp" ]] && rm -f "$tmp"
+  CLIPBOARD_TMP=""
   return 1
-}
-
-# Escape for embedding inside an AppleScript double-quoted string.
-as_escape() {
-  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
 import_to_photos() {
   local src="$1" result
-  local cap_e key_e
-  cap_e="$(as_escape "$CAPTION")"
-  key_e="$(as_escape "$NOTE_KEYWORD")"
-
-  result="$(/usr/bin/osascript <<APPLESCRIPT 2>&1
-set imagePath to POSIX file "${src}"
-tell application "Photos"
-  set importedItems to import {imagePath} with skip check duplicates
-  repeat with mediaItem in importedItems
-    try
-      set description of mediaItem to "${cap_e}"
-    end try
-    try
-      set keywords of mediaItem to {"${key_e}"}
-    end try
-    try
-      if (name of mediaItem is missing value) or (name of mediaItem is "") then
-        set name of mediaItem to "${cap_e}"
-      end if
-    end try
-  end repeat
-  return (count of importedItems) as text
-end tell
+  result="$(/usr/bin/osascript - "$src" "$CAPTION" "$NOTE_KEYWORD" <<'APPLESCRIPT' 2>&1
+on run argv
+  set imagePath to POSIX file (item 1 of argv)
+  set captionText to item 2 of argv
+  set keywordText to item 3 of argv
+  tell application "Photos"
+    set importedItems to import {imagePath} with skip check duplicates
+    repeat with mediaItem in importedItems
+      try
+        set description of mediaItem to captionText
+      end try
+      try
+        set keywords of mediaItem to {keywordText}
+      end try
+      try
+        if (name of mediaItem is missing value) or (name of mediaItem is "") then
+          set name of mediaItem to captionText
+        end if
+      end try
+    end repeat
+    return (count of importedItems) as text
+  end tell
+end run
 APPLESCRIPT
 )" || {
     log "photos: import failed for $src :: $result"
@@ -234,7 +217,7 @@ APPLESCRIPT
   }
 
   if [[ "$result" =~ ^[0-9]+$ ]] && [[ "$result" -ge 1 ]]; then
-    log "photos: imported $result item(s) caption='${CAPTION}' :: $(basename "$src")"
+    log "photos: imported $result item(s) caption='${CAPTION}' :: ${src##*/}"
     return 0
   fi
   log "photos: unexpected result '$result' for $src"
@@ -244,36 +227,26 @@ APPLESCRIPT
 maybe_delete_staging() {
   local f="$1"
   if [[ "$DELETE_STAGING_ON_SUCCESS" != "1" ]]; then
-    log "retain: DELETE_STAGING_ON_SUCCESS=0 :: $(basename "$f")"
+    log "retain: DELETE_STAGING_ON_SUCCESS=0 :: ${f##*/}"
     return 0
   fi
   if rm -f "$f"; then
-    log "cleanup: removed staging $(basename "$f")"
+    log "cleanup: removed staging ${f##*/}"
   else
     log "cleanup: failed to remove $f"
   fi
 }
 
-process_file() {
-  local f="$1" started_at clipboard_ok=0 photos_ok=1
-  started_at="$(date +%s)"
-  log "process: $f"
-
-  if ! wait_stable "$f"; then
-    log "skip: disappeared before stable: $f"
+archive_file() {
+  local f="$1" signature="$2" clipboard_ok="$3" photos_ok=1
+  if [[ "$(file_signature "$f")" != "$signature" ]]; then
+    log "retain: changed after clipboard preparation: $f"
     return 0
-  fi
-
-  # Clipboard is the interactive handoff, so never block it behind Photos.
-  if copy_png_to_clipboard "$f"; then
-    clipboard_ok=1
   fi
 
   if [[ "$IMPORT_PHOTOS" == "1" ]]; then
     prepare_photos
-    if import_to_photos "$f"; then
-      photos_ok=1
-    else
+    if ! import_to_photos "$f"; then
       photos_ok=0
       log "retain: left in staging after Photos failure: $f"
     fi
@@ -281,41 +254,63 @@ process_file() {
     log "photos: skipped (IMPORT_PHOTOS=0)"
   fi
 
-  if [[ "$IMPORT_PHOTOS" != "1" ]] || [[ "$photos_ok" == "1" ]]; then
+  if [[ "$(file_signature "$f")" != "$signature" ]]; then
+    log "retain: changed during Photos import: $f"
+  elif [[ "$IMPORT_PHOTOS" == "1" && "$photos_ok" == "1" ]] ||
+       [[ "$IMPORT_PHOTOS" != "1" && "$clipboard_ok" == "1" ]]; then
     maybe_delete_staging "$f"
+  elif [[ "$IMPORT_PHOTOS" != "1" ]]; then
+    log "retain: clipboard failed with Photos disabled: $f"
   fi
-
-  log "process: finished in $(( $(date +%s) - started_at ))s (clipboard_ok=${clipboard_ok} photos_ok=${photos_ok}) :: $(basename "$f")"
+  log "process: finished (clipboard_ok=${clipboard_ok} photos_ok=${photos_ok}) :: ${f##*/}"
 }
 
 main() {
-  if ! acquire_lock; then
-    log "skip: another process holds lock"
-    exit 0
-  fi
-
+  trap cleanup EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
   log "wake: scanning staging '$STAGING'"
   [[ -d "$STAGING" ]] || {
     log "error: staging folder missing: $STAGING"
-    exit 0
+    return 0
   }
 
-  local f count=0
+  local f count=0 clipboard_ok signature i started_at
+  local ready_files=() signatures=() clipboard_results=()
+  started_at="$(date +%s)"
+  # Do all interactive clipboard work before waiting for any Photos imports.
   while IFS= read -r -d '' f; do
     if is_image "$f"; then
-      process_file "$f"
+      log "process: $f"
+      if ! wait_stable "$f"; then
+        log "retain: not stable or disappeared: $f"
+        continue
+      fi
+      signature="$STABLE_SIGNATURE"
+      clipboard_ok=0
+      if copy_png_to_clipboard "$f"; then clipboard_ok=1; fi
+      ready_files[count]="$f"
+      signatures[count]="$signature"
+      clipboard_results[count]="$clipboard_ok"
       count=$((count + 1))
     fi
   done < <(find "$STAGING" -maxdepth 1 -type f -print0 2>/dev/null)
 
+  for ((i=0; i<count; i++)); do
+    archive_file "${ready_files[i]}" "${signatures[i]}" "${clipboard_results[i]}"
+  done
   if [[ "$count" -eq 0 ]]; then
-    log "idle: no image files to process"
+    log "idle: no ready image files to process"
   else
-    log "done: processed $count image(s)"
+    log "done: processed $count image(s) in $(( $(date +%s) - started_at ))s"
   fi
 }
 
 if [[ "${MACOS_SCREENSHOT_PIPELINE_TESTING:-0}" != "1" ]]; then
-  main "$@"
-  exit 0
+  if [[ "${1:-}" != "--lock-held" ]]; then
+    # Native kernel lock: never expires under a live worker, released on exit/crash.
+    # Keep its inode so simultaneous callers cannot acquire different lock files.
+    exec /usr/bin/lockf -k -s -t 0 "$LOCK_FILE" /bin/bash "$0" --lock-held
+  fi
+  main
 fi

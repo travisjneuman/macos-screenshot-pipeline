@@ -139,10 +139,10 @@ Photos library content is **never** deleted.
 
 | Step | What actually happens |
 |:----:|:----------------------|
-| 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), sets **HDR on**, **floating thumbnail off** |
+| 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), sets **HDR on**, **floating thumbnail off**, **capture timer off** |
 | 2 | You use stock **Cmd+Shift+3/4/5**. macOS writes the capture **into staging** (this tool does not capture) |
 | 3 | `launchd` **WatchPaths** starts `process.sh` when staging changes; the job **exits** when done (no poll loop) |
-| 4 | `process.sh`, per image: wait until size stable → **PNG onto clipboard first** → **import original into Photos** (if enabled) → **delete staging** only when cleanup rules allow |
+| 4 | `process.sh`: wait for ready files → **clipboard work for the batch first** → **import each original into Photos** (if enabled) → **delete unchanged staging files** only when cleanup rules allow |
 | 5 | Optional hotkey app: **Cmd+Shift+E** opens the **current clipboard image** in Preview (markup toolbar best-effort) |
 
 ### Capture pipeline order (default install)
@@ -160,6 +160,8 @@ screencapture  →  staging file
 | `--no-photos` / `IMPORT_PHOTOS=0` | No | Yes | No by default (`DELETE_STAGING_ON_SUCCESS=0`) |
 | `--keep-staging` / `DELETE_STAGING_ON_SUCCESS=0` | Per config | Yes | No |
 | Photos import fails | Failed | Still attempted | **No** (file retained for retry) |
+
+PNG clipboard data opens in Preview without re-encoding; TIFF clipboard data is still converted. Set `CAPTURE_DELAY=5` or `10` in config and apply the prefs helper if you want a timed Screenshot capture; default is `0`.
 
 Photos is quit after the batch if it was not running before the first import. If you already had Photos running (including in the background), it stays open. This cleanup also runs after import errors; failed imports still remain in staging. If the prior running state cannot be determined, Photos stays open.
 

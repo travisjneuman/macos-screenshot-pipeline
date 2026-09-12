@@ -29,7 +29,7 @@ Never claim one blob is both max-HDR archive and universal lossless PNG.
 2. Import the untouched **original** into Photos when `IMPORT_PHOTOS=1`
 3. **Delete** the staging file only when delete rules allow (Photos must have succeeded if Photos is enabled; `DELETE_STAGING_ON_SUCCESS` must be `1`)
 
-The interactive share path comes first so Photos responsiveness cannot delay paste. Real PNG sources that already fit the configured ceiling bypass re-encoding. HDR/HEIF sources are converted, and oversized share copies are limited to 3840px on their longest edge by default; the Photos archive remains untouched.
+All ready files in a batch receive clipboard processing before the first Photos import, so an earlier file’s archive work cannot delay a later file’s clipboard preparation. Real PNG sources that already fit the configured ceiling bypass re-encoding. HDR/HEIF sources are converted, and oversized share copies are limited to 3840px on their longest edge by default; the Photos archive remains untouched.
 
 Staging always comes first — system `screencapture` writes the file; this project only reacts afterward.
 
@@ -78,7 +78,7 @@ Markup path (independent):
 
 - **No polling loop** on the capture path.  
 - Empty WatchPaths wakes (deletes/metadata) must stay cheap — lock + scan + idle log.  
-- Single-flight lock via atomic `mkdir` (no `flock` on macOS by default). Stale lock > 120s cleared.  
+- Single-flight kernel lock via native `lockf -k -s -t 0`; a live worker’s lock never expires by age. The lock file remains after release.
 - Hotkey agent blocks on NSRunLoop; no timers for the hotkey itself.
 
 ## Failure policy
@@ -86,8 +86,8 @@ Markup path (independent):
 | Step | On failure |
 |------|------------|
 | Photos import fails | Log; **retain** staging; clipboard has already been attempted |
-| Clipboard PNG fails | Log; still attempt Photos; delete still follows Photos/delete rules |
-| Delete staging | `DELETE_STAGING_ON_SUCCESS=1` **and** (Photos off **or** Photos succeeded) |
+| Clipboard PNG fails | Still attempt Photos; retain if Photos is disabled, otherwise delete only after successful unchanged import |
+| Delete staging | `DELETE_STAGING_ON_SUCCESS=1`, unchanged file, and successful Photos import or successful clipboard copy when Photos is off |
 
 ## Security / TCC
 
