@@ -63,7 +63,8 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
        Otherwise the staging file is **retained**.
 
 11. Log to `~/Library/Logs/macos-screenshot-pipeline.log` (paths/sizes/status only).
-12. Exit 0 (including idle “no images” wakes).
+12. On exit, request Photos quit only if it was not running before the first import in this batch. Existing background sessions stay open. Unknown prior state leaves Photos open; empty/clipboard-only wakes do not touch it. Cleanup also runs on errors and INT/TERM, preserving exit status; quit failures are logged.
+13. Exit 0 on normal completion (including idle “no images” wakes).
 
 ### Default config written by `install.sh`
 

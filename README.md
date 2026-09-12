@@ -161,6 +161,8 @@ screencapture  →  staging file
 | `--keep-staging` / `DELETE_STAGING_ON_SUCCESS=0` | Per config | Yes | No |
 | Photos import fails | Failed | Still attempted | **No** (file retained for retry) |
 
+Photos is quit after the batch if it was not running before the first import. If you already had Photos running (including in the background), it stays open. This cleanup also runs after import errors; failed imports still remain in staging. If the prior running state cannot be determined, Photos stays open.
+
 **Photos vs iCloud:** the script imports into the local **Photos** library via Automation. It does not talk to iCloud itself. If iCloud Photos is enabled in System Settings, Apple may sync that library afterward.
 
 Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract: **[docs/BEHAVIOR.md](docs/BEHAVIOR.md)**

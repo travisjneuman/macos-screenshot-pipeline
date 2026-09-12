@@ -33,10 +33,41 @@ IMPORT_PHOTOS="${IMPORT_PHOTOS:-1}"
 DELETE_STAGING_ON_SUCCESS="${DELETE_STAGING_ON_SUCCESS:-1}"
 CLIPBOARD_MAX_DIMENSION="${CLIPBOARD_MAX_DIMENSION:-3840}"
 
+PHOTOS_STATE_CHECKED=0
+QUIT_PHOTOS_ON_EXIT=0
+
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 
 log() {
   printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG_FILE"
+}
+
+# Querying "running" does not launch Photos. If detection fails, leave it open.
+prepare_photos() {
+  [[ "$PHOTOS_STATE_CHECKED" == "0" ]] || return 0
+  PHOTOS_STATE_CHECKED=1
+  local running
+  if running="$(/usr/bin/osascript -e 'application "Photos" is running' 2>&1)"; then
+    if [[ "$running" == "false" ]]; then
+      QUIT_PHOTOS_ON_EXIT=1
+    fi
+  else
+    log "photos: could not determine prior state; leaving open :: $running"
+  fi
+}
+
+cleanup() {
+  local status=$? result
+  trap - EXIT
+  if [[ "$QUIT_PHOTOS_ON_EXIT" == "1" ]]; then
+    if result="$(/usr/bin/osascript -e 'if application "Photos" is running then tell application "Photos" to quit' 2>&1)"; then
+      log "photos: requested quit (not running before pipeline import)"
+    else
+      log "photos: quit failed :: $result"
+    fi
+  fi
+  rm -rf "$LOCK_DIR"
+  exit "$status"
 }
 
 # Portable single-flight lock (macOS has no flock util).
@@ -44,7 +75,9 @@ log() {
 acquire_lock() {
   if mkdir "$LOCK_DIR" 2>/dev/null; then
     echo "$$" >"${LOCK_DIR}/pid"
-    trap 'rm -rf "$LOCK_DIR"' EXIT INT TERM
+    trap cleanup EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
     return 0
   fi
   if [[ -d "$LOCK_DIR" ]]; then
@@ -56,7 +89,9 @@ acquire_lock() {
       rm -rf "$LOCK_DIR"
       if mkdir "$LOCK_DIR" 2>/dev/null; then
         echo "$$" >"${LOCK_DIR}/pid"
-        trap 'rm -rf "$LOCK_DIR"' EXIT INT TERM
+        trap cleanup EXIT
+        trap 'exit 130' INT
+        trap 'exit 143' TERM
         return 0
       fi
     fi
@@ -235,6 +270,7 @@ process_file() {
   fi
 
   if [[ "$IMPORT_PHOTOS" == "1" ]]; then
+    prepare_photos
     if import_to_photos "$f"; then
       photos_ok=1
     else
