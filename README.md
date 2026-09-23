@@ -66,16 +66,16 @@ Paid suites solve adjacent problems. This is the **thin native layer** on top of
 
 | Path | What you get | Why |
 |:-----|:-------------|:----|
-| **Archive** → Photos | System original (often **HEIC/HEIF** when HDR is on; name may still end in `.png`) | Best practical dynamic range in Apple’s stack |
-| **Share** → clipboard | Direct PNG or `sips` conversion; 3840px maximum dimension by default | Discord, Chromium, non-Apple apps |
+| **Archive** → Photos | System original (**HEIC/HEIF** when HDR is supported and enabled; PNG on the compatible SDR path) | Best practical dynamic range in Apple’s stack |
+| **Share** → clipboard | SDR PNG, direct for SDR originals or converted from HDR HEIF; 3840px maximum dimension by default | Discord, Chromium, non-Apple apps |
 
-Clipboard PNG is typically an **SDR tone-map** of HDR content. That is the correct tradeoff for “paste cleanly everywhere.”
+Clipboard is an **SDR PNG** made from the original capture; the original HDR HEIF is left unchanged for Photos. That is the correct tradeoff for “paste cleanly everywhere.”
 
-`defaults write com.apple.screencapture type png` is a **preference**, not a guarantee under HDR.
+The installer pairs macOS 26+ HDR capture with HEIC output. On earlier macOS releases, or when HDR is disabled, it uses SDR/PNG so the stock shortcut can still write a valid file.
 
 ```mermaid
 flowchart TB
-  SC["screencapture writes staging<br/>HDR on — original bytes"]
+  SC["screencapture writes staging<br/>HDR/HEIC on supported macOS"]
   SC --> CB["1 · direct PNG or sips<br/>clipboard PNGf"]
   CB --> PH["2 · Photos import<br/>original / often HEIF"]
   PH --> RM["3 · delete staging file"]
@@ -139,7 +139,7 @@ Photos library content is **never** deleted.
 
 | Step | What actually happens |
 |:----:|:----------------------|
-| 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), sets **HDR on**, **floating thumbnail off**, **capture timer off** |
+| 1 | Installer points `com.apple.screencapture` **location** at staging (default `~/Pictures/Camera Roll`), pairs **HDR with HEIC on supported macOS 26+** (otherwise SDR/PNG), turns **floating thumbnail off**, and disables the capture timer |
 | 2 | You use stock **Cmd+Shift+3/4/5**. macOS writes the capture **into staging** (this tool does not capture) |
 | 3 | `launchd` **WatchPaths** starts `process.sh` when staging changes; the job **exits** when done (no poll loop) |
 | 4 | `process.sh`: wait for ready files → **clipboard work for the batch first** → **import each original into Photos** (if enabled) → **delete unchanged staging files** only when cleanup rules allow |

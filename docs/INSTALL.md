@@ -48,8 +48,8 @@ The default clipboard copy fits within 3840px on its longest edge for fast paste
 ## Preferences applied (unless `--skip-prefs`)
 
 - `location` → staging  
-- `captureHDR` → true  
-- `type` → png  
+- macOS 26+ with HDR enabled: `captureHDR` → true, `type` → heic
+- HDR disabled or earlier macOS: `captureHDR` → false, `type` → png
 - `show-thumbnail` → false  
 
 ## Legacy private install

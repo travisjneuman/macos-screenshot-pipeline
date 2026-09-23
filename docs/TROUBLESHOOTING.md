@@ -44,6 +44,7 @@ Symptom
 | Slow large/full-screen shots | macOS may render a scaled 4K display at 5K/6K; PNG work scales with pixels | Use the default 3840px clipboard ceiling; originals in Photos are unchanged |
 | Several displays captured | Each display creates work; clipboard ends with the last processed image | Prefer selection/window capture when only one screen is needed |
 | HEIC in Finder | HDR | Expected archive form |
+| “Your screenshot can't be saved” / “Failure to write image data” with HDR capture | HDR and PNG output are mismatched | Re-apply prefs; supported macOS 26+ uses HDR/HEIC, earlier macOS uses SDR/PNG |
 | ⌘⇧E silent | Agent / Accessibility | `launchctl print`; Settings |
 | Lock exit code 75 | Another worker holds the native lock | Let the active worker finish; do not remove its lock file |
 | RegisterEventHotKey failed | Conflict / double | Restart hotkey agent |

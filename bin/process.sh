@@ -141,8 +141,8 @@ copy_png_to_clipboard() {
     resize=1
   fi
 
-  # Apple may write HEIF bytes under a .png filename when HDR capture is on.
-  # Real PNGs can go straight to the pasteboard unless the share copy is oversized.
+  # Identify PNG bytes by signature, not extension: legacy/misconfigured HDR
+  # captures may be HEIF with a .png suffix. Convert those originals for sharing.
   if is_real_png "$src" && [[ "$resize" == "0" ]]; then
     paste_source="$src"
   else

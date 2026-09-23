@@ -14,6 +14,7 @@ launchctl print "gui/${UID_NUM}/com.travisjneuman.screenshotpipeline.hotkey" \
 defaults read com.apple.screencapture location
 defaults read com.apple.screencapture show-thumbnail
 defaults read com.apple.screencapture captureHDR
+defaults read com.apple.screencapture type
 
 ls -la "${HOME}/Pictures/Camera Roll" 2>/dev/null || true
 tail -30 "${HOME}/Library/Logs/macos-screenshot-pipeline.log" 2>/dev/null || true

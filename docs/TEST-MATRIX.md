@@ -21,6 +21,8 @@ Target: current release acceptance.
 | 15 | Static smoke | `./scripts/smoke-test.sh` | Exit 0 |
 | 16 | 6K share optimization | Capture a full 5K/6K display | Clipboard log reports `resized-max-3840px`; Photos retains original dimensions |
 | 17 | Native-resolution opt-out | Install with `--clipboard-full-resolution`; capture | Clipboard is not resized |
+| 18 | HDR pair on supported macOS 26+ | `ENABLE_HDR=1`; use stock shortcut | HEIC original reaches Photos; clipboard log reports converted PNG |
+| 19 | Legacy OS fallback | Apply prefs on macOS earlier than 26 | HDR is off and native file type is PNG; clipboard and Photos path still work |
 
 ## Environment notes
 

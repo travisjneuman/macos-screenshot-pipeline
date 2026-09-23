@@ -16,7 +16,7 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 - It does **not** intercept `Cmd+Ctrl+Shift+4` (native clipboard-only); that never writes a staging file.
 - It does **not** upload to iCloud, Google Photos, or any network service.
 - It does **not** delete or modify existing items in the Photos library beyond **importing new** files and setting metadata on those new items.
-- It does **not** guarantee the on-disk capture is a real PNG when HDR is enabled (Apple may write HEIF while the name still ends in `.png`).
+- It does **not** encode or rewrite the original capture. On supported macOS 26+ systems with HDR enabled, the native screenshot is saved as HEIC/HEIF; SDR and earlier macOS use PNG.
 
 ---
 
@@ -26,8 +26,8 @@ Markup path: [`bin/hotkey-agent.swift`](../bin/hotkey-agent.swift) + [`bin/edit-
 
 1. `install.sh` (unless `--skip-prefs`) sets roughly:
    - `com.apple.screencapture location` → staging dir (default `~/Pictures/Camera Roll`)
-   - `captureHDR` → true (`ENABLE_HDR=1`)
-   - `type` → `png` (preference only)
+   - On macOS 26+ with `ENABLE_HDR=1`, `captureHDR` → true and `type` → `heic`.
+   - With `ENABLE_HDR=0` or on earlier macOS, `captureHDR` → false and `type` → `png`.
    - `show-thumbnail` → false (`SHOW_THUMBNAIL=0`)
    - `captureDelay` → 0 (`CAPTURE_DELAY=0`; optional 5 or 10 seconds)
 2. User presses stock **Cmd+Shift+3 / 4 / 5** (or window mode via Space after 4).
@@ -106,9 +106,9 @@ Requires **Accessibility** for the hotkey app (and for toolbar automation).
 
 | Stage | Format |
 |-------|--------|
-| Staging file | Whatever screencapture wrote (often HEIF under HDR; extension may still be `.png`) |
-| Photos archive | **That same original file** (import by path) |
-| Clipboard | **PNG**, direct when possible or produced by `sips` (typically SDR tone-map of HDR sources); max 3840px by default |
+| Staging file | Native original: HEIC/HEIF for HDR on supported macOS 26+; PNG for SDR and earlier macOS |
+| Photos archive | **That same original file** (import by path; HDR original remains intact) |
+| Clipboard | **SDR PNG**: direct for PNG sources or produced from the original by `sips`; max 3840px by default |
 
 ---
 

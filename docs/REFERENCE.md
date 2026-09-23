@@ -31,7 +31,7 @@ Bundle id (hotkey app): `com.travisjneuman.screenshotpipeline.hotkey`
 | `IMPORT_PHOTOS` | `1` | `0` skips Photos |
 | `DELETE_STAGING_ON_SUCCESS` | `1` (installer sets `0` with `--no-photos` or `--keep-staging`) | `0` keeps files after a successful run |
 | `CLIPBOARD_MAX_DIMENSION` | `3840` | Longest-edge limit for clipboard PNG; `0` keeps native resolution |
-| `ENABLE_HDR` | `1` | Used by prefs helper only |
+| `ENABLE_HDR` | `1` | HDR/HEIC on macOS 26+; earlier macOS safely uses SDR/PNG |
 | `SHOW_THUMBNAIL` | `0` | Used by prefs helper only |
 | `CAPTURE_DELAY` | `0` | Screenshot timer: 0, 5, or 10 seconds; prefs helper only |
 

@@ -12,14 +12,14 @@ Users want, simultaneously:
 6. Stock capture shortcuts (`⌘⇧3/4/5`)  
 7. Near-zero idle CPU for the capture path  
 
-Stock macOS offers save-to-folder **or** clipboard, not folder + clipboard + Photos, and HDR capture often produces **HEIF** even when the preference type is `png`.
+Stock macOS offers save-to-folder **or** clipboard, not folder + clipboard + Photos. On supported macOS 26+ systems, HDR screenshots use **HEIF**; SDR screenshots use **PNG**. The preferences helper keeps those modes paired and uses the legacy SDR/PNG path on earlier macOS releases.
 
 ## Dual-path decision
 
 | Path | Carrier | Consumer |
 |------|---------|----------|
-| Archive | Original `screencapture` bytes (HEIF when HDR) | Photos.app library (optional iCloud sync afterward) |
-| Share | Direct PNG, or `sips` conversion/downsample → clipboard `«class PNGf»` | Everywhere else |
+| Archive | Original `screencapture` bytes (HEIF when HDR is supported) | Photos.app library (optional iCloud sync afterward) |
+| Share | SDR PNG, direct for SDR captures or produced by `sips` from HDR HEIF → clipboard `«class PNGf»` | Everywhere else |
 
 Never claim one blob is both max-HDR archive and universal lossless PNG.
 
@@ -39,7 +39,7 @@ Staging always comes first — system `screencapture` writes the file; this proj
   ⌘⇧3 / ⌘⇧4 / ⌘⇧5
            │
            ▼
-  screencapture (location=staging, HDR on, thumbnail off)
+  screencapture (location=staging, HDR/HEIC on supported macOS; otherwise SDR/PNG)
            │
            ▼
   staging directory  ──FSEvents──▶  launchd WatchPaths
