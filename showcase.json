@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/travisjneuman/travisjneuman/main/showcase/schema/showcase-v1.json",
+  "id": "macos-screenshot-pipeline",
+  "name": "macOS Screenshot Pipeline",
+  "status": "active",
+  "statusNote": null,
+  "summary": "Native macOS utility: the original screenshot goes to Photos, a true PNG to the clipboard, and clipboard images open in Preview for markup.",
+  "visibility": "public",
+  "links": {
+    "repo": "https://github.com/travisjneuman/macos-screenshot-pipeline"
+  },
+  "stack": [
+    "macOS",
+    "Bash",
+    "Swift",
+    "launchd"
+  ],
+  "metrics": [
+    {
+      "value": "MIT",
+      "label": "License",
+      "source": "head -1 LICENSE",
+      "round": "exact",
+      "asOf": "2026-10-05"
+    },
+    {
+      "value": "WatchPaths",
+      "label": "Capture job",
+      "source": "manual: launchagents/ uses launchd WatchPaths, no polling",
+      "round": "exact",
+      "asOf": "2026-10-05"
+    },
+    {
+      "value": "v0.1.0",
+      "label": "Release",
+      "source": "grep -m1 '^## \\[[0-9]' CHANGELOG.md",
+      "round": "exact",
+      "asOf": "2026-10-05"
+    }
+  ],
+  "updated": "2026-10-05"
+}
