@@ -30,8 +30,8 @@ No paid app. No Electron. No telemetry. No Desktop landfill.
 ```mermaid
 flowchart LR
   K["Cmd+Shift+3 / 4 / 5"] --> S["staging file"]
-  S --> P["clipboard — paste-ready PNG"]
-  P --> H["Photos — original / HDR"]
+  S --> P["clipboard: paste-ready PNG"]
+  P --> H["Photos: original / HDR"]
   H --> D["delete staging"]
 ```
 
@@ -177,7 +177,7 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 |:-----|:------|
 | macOS + GUI session | LaunchAgents + TCC dialogs |
 | **Photos** + **Preview** | Photos optional with `--no-photos` |
-| **Xcode CLT** (`swiftc`) | Hotkey build — or `--no-hotkey` |
+| **Xcode CLT** (`swiftc`) | Hotkey build (or `--no-hotkey`) |
 | **Accessibility** | Global ⌘⇧E |
 | **Automation → Photos** | Import + caption |
 
@@ -223,7 +223,7 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 | [ROADMAP](docs/ROADMAP.md) | Planned customization and how to request features |
 | [GitHub About copy](docs/GITHUB-ABOUT.md) | Description, topics, social blurb |
 
-**Want a change?** Open a [feature request](https://github.com/travisjneuman/macos-screenshot-pipeline/issues/new?labels=enhancement&template=feature_request.md) or discussion on the repo — preferences, clipboard formats, Photos on/off, staging paths, hotkeys, and more are on the [roadmap](docs/ROADMAP.md).
+**Want a change?** Open a [feature request](https://github.com/travisjneuman/macos-screenshot-pipeline/issues/new?labels=enhancement&template=feature_request.md) or discussion on the repo. Preferences, clipboard formats, Photos on/off, staging paths, hotkeys, and more are on the [roadmap](docs/ROADMAP.md).
 
 ```bash
 ./scripts/smoke-test.sh    # static checks + optional swiftc
@@ -248,7 +248,7 @@ On the default success path the clipboard is ready first, then the file is remov
 </details>
 
 <details>
-<summary><strong>Finder shows HEIC / a weird preview — is it broken?</strong></summary>
+<summary><strong>Finder shows HEIC or a weird preview. Is it broken?</strong></summary>
 
 Usually **HDR archive**. Expected. Pasteboard is still a real PNG.
 
@@ -290,7 +290,7 @@ If something else also watches the same staging folder or steals **⌘⇧E**, pi
 ✓  Native tools only     launchd · sips · osascript · Photos · Preview
 ✓  Idle-free capture     WatchPaths; process starts, works, exits
 ✓  Fail safe             Photos fail → staging retained
-✓  Honest formats        HDR archive ≠ PNG paste — documented
+✓  Honest formats        HDR archive ≠ PNG paste (documented)
 ✓  No telemetry          No network from this codebase
 ✓  Removable             uninstall agents; optional stock prefs restore
 ```
@@ -301,7 +301,7 @@ If something else also watches the same staging folder or steals **⌘⇧E**, pi
 
 [MIT](LICENSE) © [Travis J. Neuman](https://github.com/travisjneuman)
 
-**v0.1.0** — production-proven behavior, public packaging. Issues and PRs welcome.
+**v0.1.0**: production-proven behavior, public packaging. Issues and PRs welcome.
 
 ---
 
