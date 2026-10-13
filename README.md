@@ -207,7 +207,9 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 
 ---
 
-## Docs
+## Documentation map
+
+Every doc, by need: **[docs/README.md](docs/README.md)**.
 
 | Doc | What’s inside |
 |:----|:--------------|
@@ -222,6 +224,8 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 | [SECURITY](SECURITY.md) | Threat model / reporting |
 | [ROADMAP](docs/ROADMAP.md) | Planned customization and how to request features |
 | [GitHub About copy](docs/GITHUB-ABOUT.md) | Description, topics, social blurb |
+| [CONTRIBUTING](CONTRIBUTING.md) | How to propose and land changes |
+| [CHANGELOG](CHANGELOG.md) | Release history and unreleased changes |
 
 **Want a change?** Open a [feature request](https://github.com/travisjneuman/macos-screenshot-pipeline/issues/new?labels=enhancement&template=feature_request.md) or discussion on the repo. Preferences, clipboard formats, Photos on/off, staging paths, hotkeys, and more are on the [roadmap](docs/ROADMAP.md).
 
