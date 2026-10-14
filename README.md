@@ -209,23 +209,24 @@ Deep dive: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** · behavior contract
 
 ## Documentation map
 
-Every doc, by need: **[docs/README.md](docs/README.md)**.
+Every doc, by need: **[docs/README.md](docs/README.md)** (routes, map, and full contents).
+Up: [github.com/travisjneuman](https://github.com/travisjneuman) · Not here: agent rules live in [AGENTS.md](AGENTS.md).
 
-| Doc | What’s inside |
-|:----|:--------------|
-| [USER-GUIDE](docs/USER-GUIDE.md) | Daily loops, disable/reenable |
-| [BEHAVIOR](docs/BEHAVIOR.md) | **Authoritative** what the code does today |
-| [ARCHITECTURE](docs/ARCHITECTURE.md) | Data flow, dual-path, resources, TCC |
-| [INSTALL](docs/INSTALL.md) | Flags, layout, legacy migration |
-| [OPERATIONS](docs/OPERATIONS.md) | Health checks, logs, restart |
-| [TROUBLESHOOTING](docs/TROUBLESHOOTING.md) | Symptom → fix |
-| [REFERENCE](docs/REFERENCE.md) | Paths, labels, env, log lines |
-| [TEST-MATRIX](docs/TEST-MATRIX.md) | Manual acceptance checklist |
-| [SECURITY](SECURITY.md) | Threat model / reporting |
-| [ROADMAP](docs/ROADMAP.md) | Planned customization and how to request features |
-| [GitHub About copy](docs/GITHUB-ABOUT.md) | Description, topics, social blurb |
-| [CONTRIBUTING](CONTRIBUTING.md) | How to propose and land changes |
-| [CHANGELOG](CHANGELOG.md) | Release history and unreleased changes |
+| Need / keywords | Open | Notes |
+|:----|:----|:----|
+| daily use, capture, paste, disable, reenable | [USER-GUIDE](docs/USER-GUIDE.md) | Daily loops |
+| what the code does today, contract | [BEHAVIOR](docs/BEHAVIOR.md) | **Authoritative** |
+| design, data flow, dual-path, TCC | [ARCHITECTURE](docs/ARCHITECTURE.md) | Data flow, resources |
+| install flags, layout, legacy migration | [INSTALL](docs/INSTALL.md) | Installer reference |
+| health check, logs, restart | [OPERATIONS](docs/OPERATIONS.md) | Running it |
+| symptom, broken, not pasting | [TROUBLESHOOTING](docs/TROUBLESHOOTING.md) | Symptom → fix |
+| paths, labels, env vars, log lines | [REFERENCE](docs/REFERENCE.md) | Lookup tables |
+| manual acceptance, release checklist | [TEST-MATRIX](docs/TEST-MATRIX.md) | Manual cases |
+| vulnerability, threat model | [SECURITY](SECURITY.md) | Reporting |
+| planned features, requests | [ROADMAP](docs/ROADMAP.md) | How to request features |
+| GitHub description, topics | [GitHub About copy](docs/GITHUB-ABOUT.md) | Social blurb |
+| contribute, propose a change | [CONTRIBUTING](CONTRIBUTING.md) | How changes land |
+| release history | [CHANGELOG](CHANGELOG.md) | Includes unreleased changes |
 
 **Want a change?** Open a [feature request](https://github.com/travisjneuman/macos-screenshot-pipeline/issues/new?labels=enhancement&template=feature_request.md) or discussion on the repo. Preferences, clipboard formats, Photos on/off, staging paths, hotkeys, and more are on the [roadmap](docs/ROADMAP.md).
 
